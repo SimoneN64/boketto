@@ -1,2 +1,0 @@
-C:/msys64/mingw64/bin/ar.exe qc libnfd.a CMakeFiles/nfd.dir/nfd_win.cpp.obj
-C:/msys64/mingw64/bin/ranlib.exe libnfd.a
