@@ -2,13 +2,25 @@
 
 namespace boketto::core
 {
-template <int i>
-void Cpu::GenerateARM() {
-  if constepxr (t)
+Cpu::Cpu(std::string bios) : mem(bios) {
+  GenerateARMLut();
+  GenerateThumbLut();
 }
 
-template <int i>
-void Cpu::GenerateThumb() {
+void Cpu::step() {
+  gpr[PC] += 4;
+  next_pc += 8;
+}
 
+void Cpu::GenerateARMLut() {
+  for(int i = 0; i < 4096; i++) {
+    arm_lut[i] = &ARMUndefined;
+  }
+}
+
+void Cpu::GenerateThumbLut() {
+  for(int i = 0; i < 1024; i++) {
+    thumb_lut[i] = &ThumbUndefined;
+  }
 }
 }

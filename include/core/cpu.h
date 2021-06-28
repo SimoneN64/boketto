@@ -7,7 +7,10 @@ namespace boketto::core
 {
 class Cpu {
 public:
-  Cpu();
+  Cpu(std::string bios);
+  void step();
+
+  Mem mem;
 private:
   union {
     struct {
@@ -27,7 +30,6 @@ private:
 
   u32 gpr[31];
   u32 next_pc;
-  u32 prev_pc;
 
   enum Flags {
     Overflow,
@@ -49,32 +51,42 @@ private:
   template <u8 cond>
   bool GetCondition() {
     switch(cond & 0xf) {
-      case 0b0000: return GetFlag<Zero>;
-      case 0b0001: return !GetFlag<Zero>;
-      case 0b0010: return GetFlag<Carry>;
-      case 0b0011: return !GetFlag<Carry>;
-      case 0b0100: return GetFlag<Negative>;
-      case 0b0101: return !GetFlag<Negative>;
-      case 0b0110: return GetFlag<Overflow>;
-      case 0b0111: return !GetFlag<Overflow>;
-      case 0b1000: return GetFlag<Carry> && !GetFlag<Zero>;
-      case 0b1001: return !GetFlag<Carry> && GetFlag<Zero>;
-      case 0b1010: return GetFlag<Negative> == GetFlag<Overflow>;
-      case 0b1011: return GetFlag<Negative> != GetFlag<Overflow>;
-      case 0b1100: return !GetFlag<Zero> && (GetFlag<Negative> == GetFlag<Overflow>);
-      case 0b1101: return GetFlag<Zero> || (GetFlag<Negative> != GetFlag<Overflow>);
+      case 0b0000: return GetFlag<Zero>();
+      case 0b0001: return !GetFlag<Zero>();
+      case 0b0010: return GetFlag<Carry>();
+      case 0b0011: return !GetFlag<Carry>();
+      case 0b0100: return GetFlag<Negative>();
+      case 0b0101: return !GetFlag<Negative>();
+      case 0b0110: return GetFlag<Overflow>();
+      case 0b0111: return !GetFlag<Overflow>();
+      case 0b1000: return GetFlag<Carry>() && !GetFlag<Zero>();
+      case 0b1001: return !GetFlag<Carry>() && GetFlag<Zero>();
+      case 0b1010: return GetFlag<Negative>() == GetFlag<Overflow>();
+      case 0b1011: return GetFlag<Negative>() != GetFlag<Overflow>();
+      case 0b1100: return !GetFlag<Zero>() && (GetFlag<Negative>() == GetFlag<Overflow>());
+      case 0b1101: return GetFlag<Zero>() || (GetFlag<Negative>() != GetFlag<Overflow>());
       case 0b1110: return true;
       case 0b1111: return false;
     }
   }
 
-  template <int i>
-  void GenerateARM();
-  template <int i>
-  void GenerateThumb();
+  using ARMHandler = void (Cpu::*) (u32);
+  using ThumbHandler = void (Cpu::*) (u16);
 
-  using Handler = void (*) ();
-  std::array<Handler, 4096> arm_instrs;
-  std::array<Handler, 1024> thumb_instrs;
+  void GenerateARMLut();
+  void GenerateThumbLut();
+
+  void ARMUndefined(u32 instruction) {
+    printf("Undefined instruction: %08X\n", instruction);
+    exit(1);
+  }
+
+  void ThumbUndefined(u16 instruction) {
+    printf("Undefined instruction: %04X\n", instruction);
+    exit(1);
+  }
+
+  std::array<ARMHandler, 4096> arm_lut;
+  std::array<ThumbHandler, 1024> thumb_lut;
 };
 }
