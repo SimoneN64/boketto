@@ -5,6 +5,7 @@ namespace boketto::core
 {
 struct Core
 {
-  Core() {}
+  Core();
+  Cpu cpu;
 };
 }
