@@ -48,8 +48,7 @@ private:
     }
   }
   
-  template <u8 cond>
-  bool GetCondition() {
+  bool GetCondition(u8 cond) {
     switch(cond & 0xf) {
       case 0b0000: return GetFlag<Zero>();
       case 0b0001: return !GetFlag<Zero>();

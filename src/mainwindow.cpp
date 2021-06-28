@@ -28,8 +28,8 @@ MainWindow::MainWindow(std::string title) : file("config.ini") {
 
 void MainWindow::OpenFile() {
   nfdchar_t *outpath;
-  nfdfilteritem_t filteritem[2] = {{ "Game Boy roms", "gb" }, { "Game Boy Color roms", "gbc" }};
-  nfdresult_t result = NFD_OpenDialog(&outpath, filteritem, 2, "roms/");
+  nfdfilteritem_t filteritem = { "Game Boy Advance roms", "gba" };
+  nfdresult_t result = NFD_OpenDialog(&outpath, &filteritem, 1, "roms/");
   if(result == NFD_OKAY)
   {
     core->LoadROM(std::string(outpath));

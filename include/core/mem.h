@@ -7,7 +7,7 @@
 #define EWRAM_SIZE 0x8000
 #define VRAM_SIZE 0x18000
 #define OAM_SIZE 0x400
-#define ROM_SIZE 0xA000000
+#define ROM_SIZE 0x2000000
 
 namespace boketto::core
 {
@@ -15,6 +15,9 @@ class Mem {
 public:
   Mem(std::string bios);
   void LoadROM(std::string path);
+  auto ReadByte(u32 addr) -> u8;
+  auto ReadHalf(u32 addr) -> u16;
+  auto ReadWord(u32 addr) -> u32;
 private:
   void LoadBIOS(std::string path);
   std::array<u8, BIOS_SIZE> bios;
