@@ -43,6 +43,12 @@ void setbit(T& num, bool val)
   num ^= (-(!!val) ^ num) & (1 << pos);
 }
 
+template <typename T, u8 bits>
+T sign_extend(T number) {
+  constexpr u32 size = sizeof(T) * 8;
+  return number << (size - bits) >> (size - bits);
+}
+
 template <typename T, T Begin, class Func, T ...Is>
 static constexpr void static_for_impl(Func&& f, std::integer_sequence<T, Is...>) {
   (f(std::integral_constant<T, Begin + Is>{ }), ...);
