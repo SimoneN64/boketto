@@ -13,6 +13,7 @@ file(GLOB_RECURSE EMU_SRC "src/*.cpp")
 include_directories(
   ${CMAKE_SOURCE_DIR}/include/
   ${CMAKE_SOURCE_DIR}/include/core/
+  ${CMAKE_SOURCE_DIR}/include/core/arm/
   ${CMAKE_SOURCE_DIR}/include/external/
   ${CMAKE_SOURCE_DIR}/include/external/nativefiledialog-extended/
 )

@@ -69,11 +69,14 @@ private:
     }
   }
 
+  void GenerateARMLut();
+  void GenerateThumbLut();
+
   using ARMHandler = void (Cpu::*) (u32);
   using ThumbHandler = void (Cpu::*) (u16);
 
-  void GenerateARMLut();
-  void GenerateThumbLut();
+  ARMHandler Misc(u32 instruction);
+  ARMHandler DataProcessing(u32 instruction);
 
   void ARMUndefined(u32 instruction) {
     printf("Undefined instruction: %08X\n", instruction);

@@ -7,7 +7,7 @@ Cpu::Cpu(std::string bios) : mem(bios) {
   GenerateThumbLut();
   cpsr.thumb = 0;
   gpr[PC] = 0x8000000;
-  gpr[PC] = 0x8000004;
+  next_pc = 0x8000004;
 }
 
 void Cpu::step() {
@@ -28,6 +28,9 @@ void Cpu::step() {
 
 void Cpu::GenerateARMLut() {
   for(int i = 0; i < 4096; i++) {
+    if((i & 0x0F900000) == 0x01000000) {
+      arm_lut[i] = Misc(i);
+    }
     arm_lut[i] = &ARMUndefined;
   }
 }
