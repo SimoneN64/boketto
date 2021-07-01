@@ -21,7 +21,7 @@ include_directories(
 find_package(SDL2 REQUIRED)
 add_subdirectory(include/external/nativefiledialog-extended/)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -static-libstdc++ -static-libgcc")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast")
 
 add_executable(${CMAKE_PROJECT_NAME}
   ${IMGUI_SRC}
@@ -29,5 +29,5 @@ add_executable(${CMAKE_PROJECT_NAME}
   ${EMU_SRC}
 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} SDL2)
+target_link_libraries(${CMAKE_PROJECT_NAME} -static SDL2main SDL2 gcc stdc++ winpthread winmm version Imm32 Setupapi)
 target_link_libraries(${CMAKE_PROJECT_NAME} nfd)
