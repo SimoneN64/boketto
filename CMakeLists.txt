@@ -1,27 +1,34 @@
-cmake_minimum_required(VERSION 3.7.0)
+cmake_minimum_required(VERSION 3.21.0)
 project(boketto)
 
-if(CMAKE_VERSION VERSION_LESS "3.7.0")
+if(CMAKE_VERSION VERSION_LESS "3.21.0")
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
-file(GLOB_RECURSE EMU_SRC "src/*.cpp")
+file(GLOB_RECURSE EMU_SRC "src/*.c")
 
 include_directories(
   ${CMAKE_SOURCE_DIR}/include/
+  ${CMAKE_SOURCE_DIR}/include/util/
   ${CMAKE_SOURCE_DIR}/include/core/
   ${CMAKE_SOURCE_DIR}/include/core/arm/
   ${CMAKE_SOURCE_DIR}/include/external/
   ${CMAKE_SOURCE_DIR}/include/external/nativefiledialog-extended/
 )
 
+if(WIN32)
+  set(FLAGS -static SDL2main SDL2 gcc stdc++ winpthread winmm version Imm32 Setupapi)
+else()
+  set(FLAGS SDL2main SDL2)
+endif()
+
 find_package(SDL2 REQUIRED)
 add_subdirectory(include/external/nativefiledialog-extended/)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
 add_executable(${CMAKE_PROJECT_NAME}
   ${IMGUI_SRC}
@@ -29,5 +36,4 @@ add_executable(${CMAKE_PROJECT_NAME}
   ${EMU_SRC}
 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} -static SDL2main SDL2 gcc stdc++ winpthread winmm version Imm32 Setupapi)
-target_link_libraries(${CMAKE_PROJECT_NAME} nfd)
+target_link_libraries(${CMAKE_PROJECT_NAME} ${FLAGS} nfd)
