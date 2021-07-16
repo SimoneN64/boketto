@@ -4,3 +4,4 @@ roms/
 *.dll
 *.bin
 *.ini
+vgcore.*

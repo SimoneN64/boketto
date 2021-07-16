@@ -1,12 +1,6 @@
 #include "core.h"
 
 void init_core(core_t* core) {
-	core = (core_t*)malloc(sizeof(core_t));
-	if(core == NULL) {
-		printf("Failed to allocate core struct\n");
-		exit(-1);
-	}
-
 	core->cycles_ran = 0;
 	core->running = false;
 }
