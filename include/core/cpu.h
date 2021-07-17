@@ -1,6 +1,7 @@
 #pragma once
 #include "arm/generator.h"
 #include "helpers.h"
+#include "mem.h"
 
 typedef struct {
   arm_handler arm_lut[4096];
@@ -9,4 +10,4 @@ typedef struct {
 } cpu_t;
 
 void init_cpu(cpu_t* cpu);
-void step(cpu_t* cpu);
+void step_cpu(cpu_t* cpu, mem_t* mem);

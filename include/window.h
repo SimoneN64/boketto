@@ -1,7 +1,7 @@
 #pragma once
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
-#include "file.h"
+#include "core.h"
 
 typedef struct {
 	SDL_Renderer* renderer;
@@ -13,3 +13,4 @@ typedef struct {
 void init_window(window_t* window, const char* title, int w, int h);
 void main_loop(window_t* window, core_t* core);
 void destroy_window(window_t* window);
+void open_file(core_t* core);

@@ -1,4 +1,4 @@
-#include "generator.h"
+#include "arm/generator.h"
 
 void generate_arm_lut(arm_handler arm_lut[4096]) {
   for(u32 i = 0; i < 4096; i++) {
