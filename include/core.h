@@ -1,5 +1,5 @@
 #pragma once
-#include "bit.h"
+#include "cpu.h"
 #include <nfd.h>
 
 typedef struct {

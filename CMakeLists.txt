@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.21.0)
+cmake_minimum_required(VERSION 3.7.0)
 project(boketto)
 
-if(CMAKE_VERSION VERSION_LESS "3.21.0")
+if(CMAKE_VERSION VERSION_LESS "3.7.0")
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
 
-set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 file(GLOB_RECURSE EMU_SRC "src/*.c")

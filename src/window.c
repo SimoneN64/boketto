@@ -60,4 +60,5 @@ void destroy_window(window_t* window) {
 	SDL_DestroyRenderer(window->renderer);
 	SDL_DestroyTexture(window->texture);
 	SDL_DestroyWindow(window->window);
+	SDL_Quit();
 }
