@@ -8,12 +8,13 @@ void init_core(core_t* core) {
 }
 
 void run_frame(core_t* core) {
-	while(core->running && (core->cycles_ran < GBA_CYCLES_PER_FRAME)) {
-		step_cpu(&core->cpu, &core->mem);
-	}
+	if(core->running) {
+		for(int i = 0; i < GBA_CYCLES_PER_FRAME; i++) {
+			step_cpu(&core->cpu, &core->mem);
+		}
 	
-	if(core->running)
-		core->cycles_ran -= GBA_CYCLES_PER_FRAME;
+		//core->cycles_ran -= GBA_CYCLES_PER_FRAME;
+	}
 }
 
 void destroy_core(core_t* core) {
