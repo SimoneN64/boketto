@@ -14,7 +14,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/include/
   ${CMAKE_SOURCE_DIR}/include/util/
   ${CMAKE_SOURCE_DIR}/include/core/
-  ${CMAKE_SOURCE_DIR}/include/core/arm/
+  ${CMAKE_SOURCE_DIR}/include/core/cpu/
   ${CMAKE_SOURCE_DIR}/include/external/
   ${CMAKE_SOURCE_DIR}/include/external/nativefiledialog-extended/
 )
