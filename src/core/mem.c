@@ -44,7 +44,7 @@ u8 read_8(mem_t* mem, u32 addr) {
     case 0x04000000 ... 0x040003FE:
       return mem->io[addr & IO_DSIZE];
     case 0x08000000 ... 0x0DFFFFFF:
-      return mem->rom[addr & mem->rom_size];
+      return mem->rom[addr & (mem->rom_size - 1)];
   }
 }
 
