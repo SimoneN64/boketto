@@ -1,4 +1,4 @@
 #pragma once
-#include "register.h"
+#include "control_flow.h"
 
-void arm_undefined(u32 instruction);
+void arm_undefined(registers_t* registers);

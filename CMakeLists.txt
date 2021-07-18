@@ -15,6 +15,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/include/util/
   ${CMAKE_SOURCE_DIR}/include/core/
   ${CMAKE_SOURCE_DIR}/include/core/cpu/
+  ${CMAKE_SOURCE_DIR}/include/core/arm/instruction/
   ${CMAKE_SOURCE_DIR}/include/external/
   ${CMAKE_SOURCE_DIR}/include/external/nativefiledialog-extended/
 )
@@ -28,9 +29,9 @@ endif()
 find_package(SDL2 REQUIRED)
 add_subdirectory(include/external/nativefiledialog-extended/)
 
-add_compile_options(-g -fsanitize=address)
+add_compile_options(-g)
 
-add_link_options(-fsanitize=address)
+#add_link_options(-fsanitize=address)
 
 add_executable(${CMAKE_PROJECT_NAME}
   ${IMGUI_SRC}
