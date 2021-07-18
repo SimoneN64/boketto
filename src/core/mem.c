@@ -10,6 +10,7 @@ void init_mem(mem_t* mem) {
 }
 
 void load_rom(mem_t* mem, const char* path) {
+  printf("Loading rom: %s\n", path);
   FILE* fp = fopen(path, "rb");
   if(fp == NULL) {
     printf("Failed to read rom %s\n", path);
@@ -18,6 +19,7 @@ void load_rom(mem_t* mem, const char* path) {
 
   fseek(fp, 0, SEEK_END);
   size_t rom_size = ftell(fp);
+  printf("Rom size: %ld\n", rom_size);
   mem->rom_size = rom_size;
   fseek(fp, 0, SEEK_SET);
 

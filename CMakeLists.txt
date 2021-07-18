@@ -28,7 +28,9 @@ endif()
 find_package(SDL2 REQUIRED)
 add_subdirectory(include/external/nativefiledialog-extended/)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+add_compile_options(-g -fsanitize=address)
+
+add_link_options(-fsanitize=address)
 
 add_executable(${CMAKE_PROJECT_NAME}
   ${IMGUI_SRC}
