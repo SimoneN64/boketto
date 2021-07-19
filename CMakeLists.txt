@@ -30,6 +30,7 @@ find_package(SDL2 REQUIRED)
 add_subdirectory(include/external/nativefiledialog-extended/)
 
 add_compile_options(-g)
+add_compile_definitions(DEBUG)
 
 #add_link_options(-fsanitize=address)
 

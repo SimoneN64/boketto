@@ -5,28 +5,24 @@ void init_window(window_t* window, const char* title, int w, int h) {
 
 	window->window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 	if(window->window == NULL) {
-		printf("%s\n", SDL_GetError());
-		exit(-2);
+		logfatal("%s\n", SDL_GetError());
 	}
 
 	window->renderer = SDL_CreateRenderer(window->window, 0, SDL_RENDERER_ACCELERATED);
 	if(window->renderer == NULL) {
-		printf("%s\n", SDL_GetError());
-		exit(-3);
+    logfatal("%s\n", SDL_GetError());
 	}
 
 	window->texture = SDL_CreateTexture(window->renderer, SDL_PIXELFORMAT_ARGB1555, SDL_TEXTUREACCESS_STREAMING, GBA_W, GBA_H);
 	if(window->texture == NULL) {
-		printf("%s\n", SDL_GetError());
-		exit(-4);
+    logfatal("%s\n", SDL_GetError());
 	}
 
 	window->running = true;
 
 	int err = SDL_RenderSetLogicalSize(window->renderer, GBA_W, GBA_H);
 	if(err < 0) {
-		printf("%s\n", SDL_GetError());
-		exit(err);
+    logfatal("%s\n", SDL_GetError());
 	}
 
 	NFD_Init();
