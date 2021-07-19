@@ -37,7 +37,7 @@ u8 read_8(mem_t* mem, u32 addr) {
     case 0x00000000 ... 0x00003FFF:
       return mem->bios[addr];
     case 0x00004000 ... 0x01FFFFFF:
-      printf("[MEM] Open bus read! (%08X)\n", addr);
+      printf("[WARN][MEM] Open bus read! (%08X)\n", addr);
       return 0xff;
     case 0x02000000 ... 0x0203FFFF:
       return mem->eWRAM[addr & EWRAM_DSIZE];
@@ -47,6 +47,8 @@ u8 read_8(mem_t* mem, u32 addr) {
       return mem->io[addr & IO_DSIZE];
     case 0x08000000 ... 0x0DFFFFFF:
       return mem->rom[addr & (mem->rom_size - 1)];
+    default:
+      printf("[ERR ][MEM] Unhandled address! (%08X)\n", addr);
   }
 }
 
@@ -60,18 +62,20 @@ u32 read_32(mem_t* mem, u32 addr) {
 
 void write_8(mem_t* mem, u32 addr, u8 val) {
   switch(addr) {
-    case 0x00004000 ... 0x01FFFFFF:
-      printf("[MEM] Open bus write! (%08X, %02X)\n", addr, val);
-      break;
-    case 0x02000000 ... 0x0203FFFF:
-      mem->eWRAM[addr & EWRAM_DSIZE] = val;
-      break;
-    case 0x03000000 ... 0x03007FFF:
-      mem->iWRAM[addr & IWRAM_DSIZE] = val;
-      break;
-    case 0x04000000 ... 0x040003FE:
-      mem->io[addr & IO_DSIZE] = val;
-      break;
+  case 0x00004000 ... 0x01FFFFFF:
+    printf("[WARN][MEM] Open bus write! (%08X, %02X)\n", addr, val);
+    break;
+  case 0x02000000 ... 0x0203FFFF:
+    mem->eWRAM[addr & EWRAM_DSIZE] = val;
+    break;
+  case 0x03000000 ... 0x03007FFF:
+    mem->iWRAM[addr & IWRAM_DSIZE] = val;
+    break;
+  case 0x04000000 ... 0x040003FE:
+    mem->io[addr & IO_DSIZE] = val;
+    break;
+  default:
+    printf("[ERR ][MEM] Unhandled address! (%08X, %02X)\n", addr, val);
   }
 }
 
