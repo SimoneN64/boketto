@@ -1,4 +1,5 @@
 #include "arm/instructions.h"
+#include "log.h"
 
 ARM_INSTRUCTION(undefined) {
   logfatal("Undefined instruction: (%08X) (%s)\n", registers->instruction, binary_str(registers->instruction));

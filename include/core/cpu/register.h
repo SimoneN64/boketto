@@ -2,7 +2,7 @@
 #define PC 15
 #define LR 14
 
-#include "bit.h"
+#include "mem.h"
 #include <memory.h>
 
 typedef union {
@@ -22,11 +22,18 @@ typedef union {
 } psr_t;
 
 typedef struct {
-  u32 gpr[16], instruction;
+  u32 gpr[16], pipe[2], instruction;
   psr_t cpsr, spsr;
 } registers_t;
 
 void init_registers(registers_t* registers);
+void flush_pipe_32(registers_t* registers, mem_t* mem);
+void flush_pipe_16(registers_t* registers, mem_t* mem);
+u32 fetch_32(registers_t* regs, mem_t* mem);
+u16 fetch_16(registers_t* regs, mem_t* mem);
 
-#define ARM_INSTRUCTION(name) void arm_##name(registers_t* registers)
-#define THUMB_INSTRUCTION(name) void thumb_##name(registers_t* registers)
+typedef void (*arm_handler)(registers_t*, mem_t*);
+typedef void (*thumb_handler)(registers_t*, mem_t*);
+
+#define ARM_INSTRUCTION(name) void arm_##name(registers_t* registers, mem_t* mem)
+#define THUMB_INSTRUCTION(name) void thumb_##name(registers_t* registers, mem_t* mem)

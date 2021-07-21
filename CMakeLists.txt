@@ -29,8 +29,13 @@ endif()
 find_package(SDL2 REQUIRED)
 add_subdirectory(include/external/nativefiledialog-extended/)
 
-add_compile_options(-g)
-add_compile_definitions(DEBUG)
+
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+  add_compile_options(-g)
+  add_compile_definitions(DEBUG)
+elseif(CMAKE_BUILD_TYPE MATCHES Release)
+  add_compile_options(-O3)
+endif()
 
 #add_link_options(-fsanitize=address)
 

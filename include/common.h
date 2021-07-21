@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "log.h"
+
 #define GBA_W 240
 #define GBA_H 160
 #define GBA_CYCLES_PER_FRAME 16777216 / 60

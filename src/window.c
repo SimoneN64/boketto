@@ -1,4 +1,5 @@
 #include "window.h"
+#include "log.h"
 
 void init_window(window_t* window, const char* title, int w, int h) {
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
