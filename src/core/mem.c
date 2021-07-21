@@ -13,7 +13,7 @@ void load_rom(mem_t* mem, const char* path) {
   log("Loading rom: %s\n", path);
   FILE* fp = fopen(path, "rb");
   if(fp == NULL) {
-    logfatal("Failed to read rom %s\n", path);
+    logfatal("Failed to open rom %s\n", path);
   }
 
   fseek(fp, 0, SEEK_END);
@@ -24,7 +24,7 @@ void load_rom(mem_t* mem, const char* path) {
 
   mem->rom = (u8*)malloc(rom_size);
   if(fread(mem->rom, 1, rom_size, fp) != rom_size) {
-    logfatal("Failed to load rom\n", 0);
+    logfatal("Failed to load rom\n");
   }
 
   fclose(fp);
