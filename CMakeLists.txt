@@ -11,12 +11,12 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 file(GLOB_RECURSE EMU_SRC "src/*.c")
 
 include_directories(
-  ${CMAKE_SOURCE_DIR}/include/
+  ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/include/util/
   ${CMAKE_SOURCE_DIR}/include/core/
   ${CMAKE_SOURCE_DIR}/include/core/cpu/
-  ${CMAKE_SOURCE_DIR}/include/core/arm/instruction/
   ${CMAKE_SOURCE_DIR}/include/external/
+  ${CMAKE_SOURCE_DIR}/include/core/arm/instruction/
   ${CMAKE_SOURCE_DIR}/include/external/nativefiledialog-extended/
 )
 

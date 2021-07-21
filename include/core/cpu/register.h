@@ -27,3 +27,6 @@ typedef struct {
 } registers_t;
 
 void init_registers(registers_t* registers);
+
+#define ARM_INSTRUCTION(name) void arm_##name(registers_t* registers)
+#define THUMB_INSTRUCTION(name) void thumb_##name(registers_t* registers)

@@ -1,6 +1,6 @@
 #include "control_flow.h"
 
-void branch(registers_t* registers) {
+ARM_INSTRUCTION(branch) {
   bool link = (registers->instruction >> 24) & 1;
   s32 addr = sex((s32)registers->instruction, 24) << 2;
   
