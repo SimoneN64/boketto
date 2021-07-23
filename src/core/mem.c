@@ -31,78 +31,102 @@ void load_rom(mem_t* mem, const char* path) {
 }
 
 u8 read_8(mem_t* mem, u32 addr) {
+  u8 val = 0xff;
   switch(addr) {
     case 0x00000000 ... 0x00003FFF:
-      logdebug("[INFO][MEM] Read from BIOS (%08X)\n", addr);
-      return mem->bios[addr];
+      val = mem->bios[addr];
+      logdebug("[INFO][MEM] Read (%02X) from BIOS (%08X)\n", val, addr);
+      break;
     case 0x00004000 ... 0x01FFFFFF:
-      logdebug("[WARN][MEM] Open bus read! (%08X)\n", addr);
+      logdebug("[WARN][MEM] Open bus read! (%08X)(0xFF)\n", addr);
       return 0xff;
     case 0x02000000 ... 0x0203FFFF:
-      logdebug("[INFO][MEM] Read from eWRAM (%08X)\n", addr);
-      return mem->eWRAM[addr & EWRAM_DSIZE];
+      val = mem->eWRAM[addr & EWRAM_DSIZE];
+      logdebug("[INFO][MEM] Read (%02X) from eWRAM (%08X)\n", val, addr);
+      break;
     case 0x03000000 ... 0x03007FFF:
-      logdebug("[INFO][MEM] Read from iWRAM (%08X)\n", addr);
-      return mem->iWRAM[addr & IWRAM_DSIZE];
+      val = mem->iWRAM[addr & IWRAM_DSIZE];
+      logdebug("[INFO][MEM] Read (%02X) from iWRAM (%08X)\n", val, addr);
+      break;
     case 0x04000000 ... 0x040003FE:
-      logdebug("[INFO][MEM] Read from IO (%08X)\n", addr);
-      return mem->io[addr & IO_DSIZE];
+      val = mem->io[addr & IO_DSIZE];
+      logdebug("[INFO][MEM] Read (%02X) from IO (%08X)\n", val, addr);
+      break;
     case 0x08000000 ... 0x0DFFFFFF:
-      logdebug("[INFO][MEM] Read from ROM (%08X)\n", addr);
-      return mem->rom[addr & (mem->rom_size - 1)];
+      val = mem->rom[addr & (mem->rom_size - 1)];
+      logdebug("[INFO][MEM] Read (%02X) from ROM (%08X)\n", val, addr);
+      break;
     default:
       logfatal("[ERR ][MEM] Unhandled address! (%08X)\n", addr);
   }
+
+  return val;
 }
 
 u16 read_16(mem_t* mem, u32 addr) {
+  u16 val = 0xffff;
   switch(addr) {
     case 0x00000000 ... 0x00003FFF:
-      logdebug("[INFO][MEM] Read from BIOS (%08X)\n", addr);
-      return *(u16*)&mem->bios[addr];
+      val = *(u16*)&mem->bios[addr];
+      logdebug("[INFO][MEM] Read (%04X) from BIOS (%08X)\n", val, addr);
+      break;
     case 0x00004000 ... 0x01FFFFFF:
-      logdebug("[WARN][MEM] Open bus read! (%08X)\n", addr);
-      return 0xff;
+      logdebug("[WARN][MEM] Open bus read! (%08X)(0xFFFF)\n", addr);
+      return 0xffff;
     case 0x02000000 ... 0x0203FFFF:
-      logdebug("[INFO][MEM] Read from eWRAM (%08X)\n", addr);
-      return *(u16*)&mem->eWRAM[addr & EWRAM_DSIZE];
+      val = *(u16*)&mem->eWRAM[addr & EWRAM_DSIZE];
+      logdebug("[INFO][MEM] Read (%04X) from eWRAM (%08X)\n", val, addr);
+      break;
     case 0x03000000 ... 0x03007FFF:
-      logdebug("[INFO][MEM] Read from iWRAM (%08X)\n", addr);
-      return *(u16*)&mem->iWRAM[addr & IWRAM_DSIZE];
+      val = *(u16*)&mem->iWRAM[addr & IWRAM_DSIZE];
+      logdebug("[INFO][MEM] Read (%04X) from iWRAM (%08X)\n", val, addr);
+      break;
     case 0x04000000 ... 0x040003FE:
-      logdebug("[INFO][MEM] Read from IO (%08X)\n", addr);
-      return *(u16*)&mem->io[addr & IO_DSIZE];
+      val = *(u16*)&mem->iWRAM[addr & IWRAM_DSIZE];
+      logdebug("[INFO][MEM] Read (%04X) from IO (%08X)\n", val, addr);
+      break;
     case 0x08000000 ... 0x0DFFFFFF:
-      logdebug("[INFO][MEM] Read from ROM (%08X)\n", addr);
-      return *(u16*)&mem->rom[addr & (mem->rom_size - 1)];
+      val = *(u16*)&mem->rom[addr & (mem->rom_size - 1)];
+      logdebug("[INFO][MEM] Read (%04X) from ROM (%08X)\n", val, addr);
+      break;
     default:
       logfatal("[ERR ][MEM] Unhandled address! (%08X)\n", addr);
   }
+
+  return val;
 }
 
 u32 read_32(mem_t* mem, u32 addr) {
+  u32 val = 0xffffffff;
   switch(addr) {
     case 0x00000000 ... 0x00003FFF:
-      logdebug("[INFO][MEM] Read from BIOS (%08X)\n", addr);
-      return *(u32*)&mem->bios[addr];
+      val = *(u32*)&mem->bios[addr];
+      logdebug("[INFO][MEM] Read (%08X) from BIOS (%08X)\n", val, addr);
+      break;
     case 0x00004000 ... 0x01FFFFFF:
-      logdebug("[WARN][MEM] Open bus read! (%08X)\n", addr);
+      logdebug("[WARN][MEM] Open bus read! (%08X)(0xFFFFFFFF)\n", addr);
       return 0xff;
     case 0x02000000 ... 0x0203FFFF:
-      logdebug("[INFO][MEM] Read from eWRAM (%08X)\n", addr);
-      return *(u32*)&mem->eWRAM[addr & EWRAM_DSIZE];
+      val = *(u32*)&mem->eWRAM[addr & EWRAM_DSIZE];
+      logdebug("[INFO][MEM] Read (%08X) from eWRAM (%08X)\n", val, addr);
+      break;
     case 0x03000000 ... 0x03007FFF:
-      logdebug("[INFO][MEM] Read from iWRAM (%08X)\n", addr);
-      return *(u32*)&mem->iWRAM[addr & IWRAM_DSIZE];
+      val = *(u32*)&mem->iWRAM[addr & IWRAM_DSIZE];
+      logdebug("[INFO][MEM] Read (%08X) from iWRAM (%08X)\n", val, addr);
+      break;
     case 0x04000000 ... 0x040003FE:
-      logdebug("[INFO][MEM] Read from IO (%08X)\n", addr);
-      return *(u32*)&mem->io[addr & IO_DSIZE];
+      val = *(u32*)&mem->io[addr & IO_DSIZE];
+      logdebug("[INFO][MEM] Read (%08X) from IO (%08X)\n", val, addr);
+      break;
     case 0x08000000 ... 0x0DFFFFFF:
-      logdebug("[INFO][MEM] Read from ROM (%08X)\n", addr);
-      return *(u32*)&mem->rom[addr & (mem->rom_size - 1)];
+      val = *(u32*)&mem->rom[addr & (mem->rom_size - 1)];
+      logdebug("[INFO][MEM] Read (%08X) from ROM (%08X)\n", val, addr);
+      break;
     default:
       logfatal("[ERR ][MEM] Unhandled address! (%08X)\n", addr);
   }
+
+  return val;
 }
 
 void write_8(mem_t* mem, u32 addr, u8 val) {

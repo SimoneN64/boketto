@@ -65,6 +65,7 @@ void open_file(core_t* core) {
 	nfdresult_t result = NFD_OpenDialog(&core->rom_file, filter, 1, "roms/");
 	if(result == NFD_OKAY) {
 		load_rom(&core->mem, core->rom_file);
+    flush_pipe_32(&core->cpu.regs, &core->mem);
 		core->running = true;
 	}
 }

@@ -3,8 +3,8 @@
 void init_core(core_t* core) {
 	core->cycles_ran = 0;
 	core->running = false;
+  init_mem(&core->mem);
 	init_cpu(&core->cpu);
-	init_mem(&core->mem);
 }
 
 void run_frame(core_t* core) {

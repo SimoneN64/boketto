@@ -19,3 +19,7 @@ char* binary_str(u32 number) {
 
   return result;
 }
+
+s32 sex(s32 number, u8 amount) {
+  return (number << (32 - amount)) >> (32 - amount);
+}
