@@ -1,6 +1,10 @@
 #pragma once
 #define SDL_MAIN_HANDLED
+#ifdef __APPLE__
 #include <SDL.h>
+#else
+#include <SDL2/SDL.h>
+#endif
 #include "core.h"
 
 typedef struct {

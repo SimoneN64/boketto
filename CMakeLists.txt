@@ -13,6 +13,10 @@ add_subdirectory(include/external/nativefiledialog-extended/)
 
 file(GLOB_RECURSE EMU_SRC "src/*.c")
 
+if(APPLE)
+  include_directories(${SDL2_INCLUDE_DIRS})
+endif()
+
 include_directories(
   ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/include/util/
@@ -21,13 +25,14 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/include/external/
   ${CMAKE_SOURCE_DIR}/include/core/arm/instruction/
   ${CMAKE_SOURCE_DIR}/include/external/nativefiledialog-extended/
-  ${SDL2_INCLUDE_DIRS}
 )
 
 if(WIN32)
   set(FLAGS -static SDL2main SDL2 gcc stdc++ winpthread winmm version Imm32 Setupapi)
-else()
+elseif(UNIX)
   set(FLAGS SDL2main SDL2)
+else()
+  set(FLAGS ${SDL2_LIBRARIES})
 endif()
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -45,4 +50,4 @@ add_executable(${CMAKE_PROJECT_NAME}
   ${EMU_SRC}
 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} ${FLAGS} nfd ${SDL2_LIBRARIES})
+target_link_libraries(${CMAKE_PROJECT_NAME} ${FLAGS} nfd)
