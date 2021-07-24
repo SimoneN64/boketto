@@ -8,6 +8,9 @@ endif()
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+find_package(SDL2 REQUIRED)
+add_subdirectory(include/external/nativefiledialog-extended/)
+
 file(GLOB_RECURSE EMU_SRC "src/*.c")
 
 include_directories(
@@ -18,6 +21,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/include/external/
   ${CMAKE_SOURCE_DIR}/include/core/arm/instruction/
   ${CMAKE_SOURCE_DIR}/include/external/nativefiledialog-extended/
+  ${SDL2_INCLUDE_DIRS}
 )
 
 if(WIN32)
@@ -25,10 +29,6 @@ if(WIN32)
 else()
   set(FLAGS SDL2main SDL2)
 endif()
-
-find_package(SDL2 REQUIRED)
-add_subdirectory(include/external/nativefiledialog-extended/)
-
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
   add_compile_options(-g)
@@ -45,4 +45,4 @@ add_executable(${CMAKE_PROJECT_NAME}
   ${EMU_SRC}
 )
 
-target_link_libraries(${CMAKE_PROJECT_NAME} ${FLAGS} nfd)
+target_link_libraries(${CMAKE_PROJECT_NAME} ${FLAGS} nfd ${SDL2_LIBRARIES})

@@ -18,14 +18,16 @@ void load_rom(mem_t* mem, const char* path) {
 
   fseek(fp, 0, SEEK_END);
   size_t rom_size = ftell(fp);
-  printf("Rom size: %ld\n", rom_size);
-  mem->rom_size = rom_size;
+  size_t rounded_rom_size = next_power_of_two(rom_size);
+  printf("Rom size: %zu (rounded to %zu)\n", rom_size, rounded_rom_size);
+  mem->rom_size = rounded_rom_size;
   fseek(fp, 0, SEEK_SET);
 
-  mem->rom = (u8*)malloc(rom_size);
+  mem->rom = (u8*)malloc(rounded_rom_size);
   if(fread(mem->rom, 1, rom_size, fp) != rom_size) {
     logfatal("Failed to load rom\n");
   }
+  memset(&mem->rom[rom_size], 0, rounded_rom_size - rom_size);
 
   fclose(fp);
 }
