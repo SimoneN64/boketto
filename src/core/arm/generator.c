@@ -10,7 +10,7 @@ void generate_arm_lut(arm_handler arm_lut[4096]) {
       if((bits(opcode, 20, 24) & 0b11001) == 0b10000) {
         arm_lut[i] = &arm_unimplemented;
       } else {
-        arm_lut[i] = &arm_handle_data_processing;
+        arm_lut[i] = arm_handle_data_processing(opcode);
       }
     } else {
       arm_lut[i] = &arm_undefined;

@@ -1,5 +1,5 @@
 #pragma once
 #include "register.h"
 
-void arm_handle_data_processing(registers_t* registers, mem_t* mem);
-ARM_INSTRUCTION(add);
+arm_handler arm_handle_data_processing(u32 instruction);
+ARM_INSTRUCTION(mov);

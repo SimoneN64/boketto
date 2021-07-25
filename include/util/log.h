@@ -4,5 +4,5 @@
 #ifdef DEBUG
 #define logdebug(fmt, ...) do { printf(fmt, ##__VA_ARGS__); } while(0)
 #else
-#define logdebug(fmt, ...) do { printf(fmt, ##__VA_ARGS__); } while(0)
+#define logdebug(fmt, ...)
 #endif
