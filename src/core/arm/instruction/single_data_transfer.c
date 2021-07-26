@@ -15,12 +15,12 @@ ARM_INSTRUCTION(str) {
   u32 address = registers->gpr[rn];
   u32 offset = bit(registers->instruction, 25) ? shift_data_processing(registers) : registers->instruction & 0xfff;
   logdebug("str r%d, [r%d, %08X]\n", rd, rn, offset);
-  address = bit(registers->instruction, 23) ? address + offset : address - offset;
+  if(bit(registers->instruction, 24)) {
+    address = bit(registers->instruction, 23) ? address + offset : address - offset;
+  }
+
   if(bit(registers->instruction, 22)) {
-    write_8(mem, address, registers->gpr[rd]);
-    write_8(mem, address + 1, registers->gpr[rd]);
-    write_8(mem, address + 2, registers->gpr[rd]);
-    write_8(mem, address + 4, registers->gpr[rd]);
+    logfatal("strb!\n");
   } else {
     write_32(mem, address, registers->gpr[rd]);
   }

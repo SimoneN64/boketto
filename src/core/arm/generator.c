@@ -7,11 +7,13 @@ void generate_arm_lut(arm_handler arm_lut[4096]) {
     if ((opcode & 0x0E000000) == 0x0A000000) {
       arm_lut[i] = &arm_branch;
     } else if ((opcode & 0x0c000010) == 0) {
-      if((bits(opcode, 20, 24) & 0b11001) == 0b10000) {
+      if ((bits(opcode, 20, 24) & 0b11001) == 0b10000) {
         arm_lut[i] = &arm_unimplemented;
       } else {
-        arm_lut[i] = arm_handle_data_processing(opcode);
+        arm_lut[i] = arm_handle_data_processing_shift(opcode);
       }
+    } else if ((opcode & 0x0E000000) == 0x02000000) {
+      arm_lut[i] = arm_handle_data_processing(opcode);
     } else if ((opcode & 0x0C000000) == 0x04000000) { // single data transfer
       arm_lut[i] = arm_handle_single_data_transfer(opcode);
     } else {

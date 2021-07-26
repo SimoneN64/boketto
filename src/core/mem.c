@@ -59,7 +59,7 @@ u8 read_8(mem_t* mem, u32 addr) {
       logdebug("[INFO][MEM] Read (%02X) from ROM (%08X)\n", val, addr);
       break;
     default:
-      logfatal("[ERR ][MEM] Unhandled address! (%08X)\n", addr);
+      logfatal("[ERR ][MEM] Read on unhandled address! (%08X)\n", addr);
   }
 
   return val;
@@ -92,7 +92,7 @@ u16 read_16(mem_t* mem, u32 addr) {
       logdebug("[INFO][MEM] Read (%04X) from ROM (%08X)\n", val, addr);
       break;
     default:
-      logfatal("[ERR ][MEM] Unhandled address! (%08X)\n", addr);
+      logfatal("[ERR ][MEM] Read on unhandled address! (addr: %08X)\n", addr);
   }
 
   return val;
@@ -125,7 +125,7 @@ u32 read_32(mem_t* mem, u32 addr) {
       logdebug("[INFO][MEM] Read (%08X) from ROM (%08X)\n", val, addr);
       break;
     default:
-      logfatal("[ERR ][MEM] Unhandled address! (%08X)\n", addr);
+      logfatal("[ERR ][MEM] Read on unhandled address! (addr: %08X)\n", addr);
   }
 
   return val;
@@ -149,7 +149,7 @@ void write_8(mem_t* mem, u32 addr, u8 val) {
     mem->io[addr & IO_DSIZE] = val;
     break;
   default:
-    logfatal("[ERR ][MEM] Unhandled address! (%08X, %02X)\n", addr, val);
+    logfatal("[ERR ][MEM] Write to unhandled address! (addr: %08X, val: %02X)\n", addr, val);
   }
 }
 
@@ -171,7 +171,7 @@ void write_16(mem_t* mem, u32 addr, u16 val) {
       *(u16*)&mem->io[addr & IO_DSIZE] = val;
       break;
     default:
-      logfatal("[ERR ][MEM] Unhandled address! (%08X, %02X)\n", addr, val);
+      logfatal("[ERR ][MEM] Write to unhandled address! (addr: %08X, val: %04X)\n", addr, val);
   }
 }
 
@@ -193,6 +193,6 @@ void write_32(mem_t* mem, u32 addr, u32 val) {
       *(u32*)&mem->io[addr & IO_DSIZE] = val;
       break;
     default:
-      logfatal("[ERR ][MEM] Unhandled address! (%08X, %02X)\n", addr, val);
+      logfatal("[ERR ][MEM] Write to unhandled address! (addr: %08X, val: %08X)\n", addr, val);
   }
 }

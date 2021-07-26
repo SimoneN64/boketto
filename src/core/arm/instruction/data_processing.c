@@ -1,7 +1,7 @@
 #include "data_processing.h"
 #include "log.h"
 
-arm_handler arm_handle_data_processing(u32 instruction) {
+arm_handler arm_handle_data_processing_shift(u32 instruction) {
   switch(bits(instruction, 21, 24)) {
     case 0b0000: return &arm_unimplemented_data_processing;
     case 0b0001: return &arm_unimplemented_data_processing;
@@ -23,10 +23,16 @@ arm_handler arm_handle_data_processing(u32 instruction) {
   }
 }
 
+arm_handler arm_handle_data_processing(u32 instruction) {
+  switch(bits(instruction, 21, 24)) {
+
+  }
+}
+
 u32 shift_data_processing(registers_t* regs) {
   u32 result = 0;
   if(bit(regs->instruction, 25)) {
-    result = ror32(regs->instruction & 0xff, bits(regs->instruction, 8, 11));
+    result = ror32(regs->instruction & 0xff, bits(regs->instruction, 8, 11) * 2);
   } else {
     result = regs->gpr[regs->instruction & 0xf];
     u32 amount = bit(regs->instruction, 4) ? regs->gpr[bits(regs->instruction, 8, 11)] : bits(regs->instruction, 7, 11);
@@ -55,7 +61,7 @@ u32 shift_data_processing(registers_t* regs) {
 
 ARM_INSTRUCTION(mov) {
   u8 rd = bits(registers->instruction, 12, 15);
-  logdebug("mov r%d, %08X\n", rd, registers->instruction & 0xfff);
+  logdebug("mov r%d, %08X\n", rd, shift_data_processing(registers));
   if(rd == 15) {
     flush_pipe_32(registers, mem);
   }
