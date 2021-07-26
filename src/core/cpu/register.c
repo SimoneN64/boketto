@@ -1,5 +1,5 @@
 #include "register.h"
-
+#include "log.h"
 void init_registers(registers_t* registers) {
   memset(registers->gpr, 0, sizeof(registers->gpr));
   memset(registers->pipe, 0, sizeof(registers->pipe));
@@ -10,12 +10,14 @@ void init_registers(registers_t* registers) {
 }
 
 void flush_pipe_32(registers_t* regs, mem_t* mem) {
+  logdebug("[CPU][ARM] Write to pc, pipeline flush...\n");
   regs->pipe[0] = read_32(mem, regs->gpr[PC]);
   regs->pipe[1] = read_32(mem, regs->gpr[PC] + 4);
   regs->gpr[PC] += 4;
 }
 
 void flush_pipe_16(registers_t* regs, mem_t* mem) {
+  logdebug("[CPU][THB] Write to pc, pipeline flush...\n");
   regs->pipe[0] = read_16(mem, regs->gpr[PC]);
   regs->pipe[1] = read_16(mem, regs->gpr[PC] + 2);
   regs->gpr[PC] += 2;
