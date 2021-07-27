@@ -1,11 +1,5 @@
 #include "arm/generator.h"
 
-void generate_thumb_lut(thumb_handler thumb_lut[4096]) {
-  for(u32 i = 0; i < 4096; i++) {
-    thumb_lut[i] = &thumb_undefined;
-  }
-}
-
 void generate_arm_lut(arm_handler arm_lut[4096]) {
   for(u32 i = 0; i < 4096; i++) {
     u32 mask = ((i & 0xFF0) << 16) | ((i & 0xF) << 4);
