@@ -30,7 +30,7 @@ include_directories(
 if(WIN32)
   set(FLAGS -static SDL2main SDL2 gcc stdc++ winpthread winmm version Imm32 Setupapi)
 elseif(UNIX)
-  set(FLAGS SDL2main SDL2)
+  set(FLAGS SDL2)
 else()
   set(FLAGS ${SDL2_LIBRARIES})
 endif()

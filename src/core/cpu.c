@@ -4,6 +4,7 @@
 void init_cpu(cpu_t* cpu) {
   init_registers(&cpu->regs);
   generate_arm_lut(cpu->arm_lut);
+  generate_thumb_lut(cpu->thumb_lut);
 }
 
 void step_cpu(cpu_t* cpu, mem_t* mem) {
