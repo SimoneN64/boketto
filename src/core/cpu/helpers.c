@@ -1,4 +1,5 @@
 #include "helpers.h"
+#include "log.h"
 
 bool get_condition(psr_t psr, u8 cond) {
   switch(cond & 0xf) {
@@ -17,6 +18,6 @@ bool get_condition(psr_t psr, u8 cond) {
     case 0b1100: return !psr.zero && (psr.negative == psr.overflow);
     case 0b1101: return  psr.zero || (psr.negative != psr.overflow);
     case 0b1110: return true;
-    case 0b1111: return false;
+    case 0b1111: logfatal("NV condition should never happen!\n");
   }
 }

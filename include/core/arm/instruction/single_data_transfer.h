@@ -1,6 +1,7 @@
 #pragma once
-#include "data_processing.h"
+#include "register.h"
 
+u32 shift_single_data_transfer(registers_t* regs);
 arm_handler arm_handle_single_data_transfer(u32 instruction);
 ARM_INSTRUCTION(str);
 ARM_INSTRUCTION(ldr);

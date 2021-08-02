@@ -8,7 +8,7 @@ void generate_arm_lut(arm_handler arm_lut[4096]) {
       arm_lut[i] = &arm_branch;
     } else if ((opcode & 0x0C000010) == 0) {
       if ((bits(opcode, 20, 24) & 0b11001) == 0b10000) {
-        arm_lut[i] = &arm_unimplemented;
+        arm_lut[i] = arm_handle_status_register(opcode);
       } else {
         arm_lut[i] = arm_handle_data_processing(opcode);
       }
