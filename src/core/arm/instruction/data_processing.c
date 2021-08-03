@@ -37,7 +37,7 @@ arm_handler arm_handle_data_processing(u32 instruction) {
     case 0b0001: return &arm_unimplemented_data_processing;
     case 0b0010: return &arm_unimplemented_data_processing;
     case 0b0011: return &arm_unimplemented_data_processing;
-    case 0b0100: return &arm_unimplemented_data_processing;
+    case 0b0100: return &arm_add;
     case 0b0101: return &arm_unimplemented_data_processing;
     case 0b0110: return &arm_unimplemented_data_processing;
     case 0b0111: return &arm_unimplemented_data_processing;
@@ -57,11 +57,35 @@ ARM_INSTRUCTION(mov) {
   u8 rd = bits(registers->instruction, 12, 15);
   logdebug("mov r%d, %08X\n", rd, shift_data_processing(registers));
   registers->gpr[rd] = shift_data_processing(registers);
-  if(rd == 15) {
-    flush_pipe_32(registers, mem);
+
+  if(bit(registers->instruction, 20)) {
+    registers->cpsr.negative = bit(registers->gpr[rd], 31);
+    registers->cpsr.zero = registers->gpr[rd] == 0 ? 1 : 0;
+    if(rd == 15) {
+      registers->cpsr.raw = registers->spsr.raw;
+      flush_pipe_32(registers, mem);
+    }
   }
-  registers->cpsr.negative = bit(registers->gpr[rd], 31);
-  registers->cpsr.zero = registers->gpr[rd] == 0 ? 1 : 0;
+}
+
+ARM_INSTRUCTION(add) {
+  u8 rd = bits(registers->instruction, 12, 15);
+  u8 rn = bits(registers->instruction, 16, 19);
+  logdebug("add r%d, r%d, %08X\n", rd, rn, shift_data_processing(registers));
+  u32 op1 = shift_data_processing(registers);
+  u32 op2 = registers->gpr[rn];
+  registers->gpr[rd] = op1 + op2;
+
+  if(bit(registers->instruction, 20)) {
+    registers->cpsr.negative = bit(registers->gpr[rd], 31);
+    registers->cpsr.zero = registers->gpr[rd] == 0 ? 1 : 0;
+    registers->cpsr.overflow = ((op1 >> 31) == (op2 >> 31)) && ((op1 >> 31) != (registers->gpr[rd] >> 31));
+    registers->cpsr.carry = (registers->gpr[rd] < op2) && (registers->gpr[rd] < op1);
+    if(rd == 15) {
+      registers->cpsr.raw = registers->spsr.raw;
+      flush_pipe_32(registers, mem);
+    }
+  }
 }
 
 ARM_INSTRUCTION(undefined_data_processing) {
