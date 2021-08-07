@@ -33,13 +33,13 @@ u32 shift_single_data_transfer(registers_t* regs) {
 
 arm_handler arm_handle_single_data_transfer(u32 instruction) {
   if(bit(instruction, 26)) {
-    if (bit(instruction, 20)) {
+    if (L(instruction)) {
       return &arm_ldr;
     } else {
       return &arm_str;
     }
   } else {
-    if (bit(instruction, 20)) {
+    if (L(instruction)) {
       return &arm_ldrh;
     } else {
       return &arm_strh;
@@ -57,60 +57,52 @@ ARM_INSTRUCTION(ldrh) {
 
 ARM_INSTRUCTION(str) {
   bool post = false;
-  u8 rd = bits(registers->instruction, 12, 15);
-  u8 rn = bits(registers->instruction, 16, 19);
-  u32 address = registers->gpr[rn];
-  u32 offset = bit(registers->instruction, 25) ? shift_single_data_transfer(registers) : registers->instruction & 0xfff;
-  logdebug("str r%d, [r%d, %08X]\n", rd, rn, offset);
-  if(bit(registers->instruction, 24)) {
-    address = bit(registers->instruction, 23) ? address + offset : address - offset;
-  } else {
-    post = true;
+  u32 instr = registers->instruction;
+  u32 address = registers->gpr[rn(instr)];
+  u32 offset = bit(instr, 25) ? shift_single_data_transfer(registers) : instr & 0xfff;
+
+  logdebug("str r%d, [r%d, %08X]\n", rd(instr), rn(instr), offset);
+
+  if(P(instr)) {
+    address = U(instr) ? address + offset : address - offset;
   }
 
-  if(bit(registers->instruction, 22)) {
+  if(I(instr)) {
     logfatal("strb!\n");
   } else {
-    write_32(mem, address, registers->gpr[rd]);
+    write_32(mem, address, registers->gpr[rd(instr)]);
   }
 
-  if(bit(registers->instruction, 21)) {
-    if(post) {
-      address = bit(registers->instruction, 23) ? address + offset : address - offset;
-    }
-
-    registers->gpr[rn] = address;
+  if(W(instr) || !P(instr)) {
+    address = U(instr) ? address + offset : address - offset;
+    registers->gpr[rn(instr)] = address;
   }
 }
 
 ARM_INSTRUCTION(ldr) {
   bool post = false;
-  u8 rd = bits(registers->instruction, 12, 15);
-  u8 rn = bits(registers->instruction, 16, 19);
-  u32 address = registers->gpr[rn];
-  u32 offset = bit(registers->instruction, 25) ? shift_single_data_transfer(registers) : registers->instruction & 0xfff;
-  logdebug("ldr r%d, [r%d, %08X]\n", rd, rn, offset);
-  if(bit(registers->instruction, 24)) {
-    address = bit(registers->instruction, 23) ? address + offset : address - offset;
-  } else {
-    post = true;
+  u32 instr = registers->instruction;
+  u32 address = registers->gpr[rn(instr)];
+  u32 offset = bit(registers->instruction, 25) ? shift_single_data_transfer(registers) : instr & 0xfff;
+
+  logdebug("ldr r%d, [r%d, %08X]\n", rd(instr), rn(instr), offset);
+
+  if(P(instr)) {
+    address = U(instr) ? address + offset : address - offset;
   }
 
-  if(bit(registers->instruction, 22)) {
+  if(I(instr)) {
     logfatal("ldrb!\n");
   } else {
-    registers->gpr[rd] = read_32(mem, address);
-    if(rd == 15) {
+    registers->gpr[rd(instr)] = read_32(mem, address);
+    if(rd(instr) == 15) {
       flush_pipe_32(registers, mem);
     }
   }
 
-  if(bit(registers->instruction, 21)) {
-    if(post) {
-      address = bit(registers->instruction, 23) ? address + offset : address - offset;
-    }
-
-    registers->gpr[rn] = address;
+  if(W(instr) || !P(instr)) {
+    address = U(instr) ? address + offset : address - offset;
+    registers->gpr[rn(instr)] = address;
   }
 }
 
