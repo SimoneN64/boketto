@@ -1,9 +1,10 @@
 #pragma once
 #include "register.h"
 // Single data transfer bits that determine different behaviour, macro'd because "a little hardcoded values and random constants never hurt anyone" amirite
+#define I(x) (bit(x, 25))
 #define P(x) (bit(x, 24))
 #define U(x) (bit(x, 23))
-#define I(x) (bit(x, 22))
+#define B(x) (bit(x, 22))
 #define W(x) (bit(x, 21))
 #define L(x) (bit(x, 20))
 #define rd(x) (bits(x, 12, 15))

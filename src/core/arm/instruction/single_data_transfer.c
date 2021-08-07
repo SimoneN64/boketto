@@ -56,10 +56,9 @@ ARM_INSTRUCTION(ldrh) {
 }
 
 ARM_INSTRUCTION(str) {
-  bool post = false;
   u32 instr = registers->instruction;
   u32 address = registers->gpr[rn(instr)];
-  u32 offset = bit(instr, 25) ? shift_single_data_transfer(registers) : instr & 0xfff;
+  u32 offset = I(instr) ? shift_single_data_transfer(registers) : instr & 0xfff;
 
   logdebug("str r%d, [r%d, %08X]\n", rd(instr), rn(instr), offset);
 
@@ -67,23 +66,29 @@ ARM_INSTRUCTION(str) {
     address = U(instr) ? address + offset : address - offset;
   }
 
-  if(I(instr)) {
+  if(B(instr)) {
     logfatal("strb!\n");
   } else {
     write_32(mem, address, registers->gpr[rd(instr)]);
   }
 
   if(W(instr) || !P(instr)) {
-    address = U(instr) ? address + offset : address - offset;
-    registers->gpr[rn(instr)] = address;
+    if(!P(instr)) {
+      address = U(instr) ? address + offset : address - offset;
+    }
+
+    if(rn(instr) != 15) {
+      registers->gpr[rn(instr)] = address;
+    } else {
+      flush_pipe_32(registers, mem);
+    }
   }
 }
 
 ARM_INSTRUCTION(ldr) {
-  bool post = false;
   u32 instr = registers->instruction;
   u32 address = registers->gpr[rn(instr)];
-  u32 offset = bit(registers->instruction, 25) ? shift_single_data_transfer(registers) : instr & 0xfff;
+  u32 offset = I(instr) ? shift_single_data_transfer(registers) : instr & 0xfff;
 
   logdebug("ldr r%d, [r%d, %08X]\n", rd(instr), rn(instr), offset);
 
@@ -91,18 +96,26 @@ ARM_INSTRUCTION(ldr) {
     address = U(instr) ? address + offset : address - offset;
   }
 
-  if(I(instr)) {
+  if(B(instr)) {
     logfatal("ldrb!\n");
   } else {
-    registers->gpr[rd(instr)] = read_32(mem, address);
-    if(rd(instr) == 15) {
+    if(rd(instr) != 15) {
+      registers->gpr[rd(instr)] = read_32(mem, address);
+    } else {
       flush_pipe_32(registers, mem);
     }
   }
 
   if(W(instr) || !P(instr)) {
-    address = U(instr) ? address + offset : address - offset;
-    registers->gpr[rn(instr)] = address;
+    if(!P(instr)) {
+      address = U(instr) ? address + offset : address - offset;
+    }
+
+    if(rn(instr) != 15) {
+      registers->gpr[rn(instr)] = address;
+    } else {
+      flush_pipe_32(registers, mem);
+    }
   }
 }
 
