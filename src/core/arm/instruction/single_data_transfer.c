@@ -48,11 +48,61 @@ arm_handler arm_handle_single_data_transfer(u32 instruction) {
 }
 
 ARM_INSTRUCTION(strh) {
-  logfatal("Unimplemented STRH\n");
+  u32 instr = registers->instruction;
+  bool I = B(instr); // STRH/LDRH's 'I' is STR/LDR's 'B'
+  u32 address = registers->gpr[rn(instr)];
+  u32 offset = I ? (bits(instr, 8, 11) << 4) | (instr & 0xf) : registers->gpr[rm(instr)];
+
+  logdebug("strh r%d, [r%d, %08X]\n", rd(instr), rn(instr), offset);
+
+  if(P(instr)) {
+    address = U(instr) ? address + offset : address - offset;
+  }
+
+  write_16(mem, address, registers->gpr[rd(instr)]);
+
+  if(W(instr) || !P(instr)) {
+    if(!P(instr)) {
+      address = U(instr) ? address + offset : address - offset;
+    }
+
+    if(rn(instr) != 15) {
+      registers->gpr[rn(instr)] = address;
+    } else {
+      flush_pipe_32(registers, mem);
+    }
+  }
 }
 
 ARM_INSTRUCTION(ldrh) {
-  logfatal("Unimplemented LDRH\n");
+  u32 instr = registers->instruction;
+  bool I = B(instr); // STRH/LDRH's 'I' is STR/LDR's 'B'
+  u32 address = registers->gpr[rn(instr)];
+  u32 offset = I ? (bits(instr, 8, 11) << 4) | (instr & 0xf) : registers->gpr[rm(instr)];
+
+  logdebug("ldrh r%d, [r%d, %08X]\n", rd(instr), rn(instr), offset);
+
+  if(P(instr)) {
+    address = U(instr) ? address + offset : address - offset;
+  }
+
+  if(rd(instr) != 15) {
+    registers->gpr[rd(instr)] = read_16(mem, address);
+  } else {
+    flush_pipe_32(registers, mem);
+  }
+
+  if(W(instr) || !P(instr)) {
+    if(!P(instr)) {
+      address = U(instr) ? address + offset : address - offset;
+    }
+
+    if(rn(instr) != 15) {
+      registers->gpr[rn(instr)] = address;
+    } else {
+      flush_pipe_32(registers, mem);
+    }
+  }
 }
 
 ARM_INSTRUCTION(str) {

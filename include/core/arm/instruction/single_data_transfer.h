@@ -9,6 +9,7 @@
 #define L(x) (bit(x, 20))
 #define rd(x) (bits(x, 12, 15))
 #define rn(x) (bits(x, 16, 19))
+#define rm(x) ((x) & 0xf)
 
 u32 shift_single_data_transfer(registers_t* regs);
 arm_handler arm_handle_single_data_transfer(u32 instruction);
