@@ -23,6 +23,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/include/core/
   ${CMAKE_SOURCE_DIR}/include/core/ppu/
   ${CMAKE_SOURCE_DIR}/include/core/cpu/
+  ${CMAKE_SOURCE_DIR}/include/core/scheduler/
   ${CMAKE_SOURCE_DIR}/include/external/
   ${CMAKE_SOURCE_DIR}/include/core/arm/instruction/
   ${CMAKE_SOURCE_DIR}/include/external/nativefiledialog-extended/

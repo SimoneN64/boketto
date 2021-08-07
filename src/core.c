@@ -5,6 +5,7 @@ void init_core(core_t* core) {
 	core->running = false;
   init_mem(&core->mem);
 	init_cpu(&core->cpu);
+  init_scheduler(&core->scheduler);
 }
 
 void run_frame(core_t* core) {
