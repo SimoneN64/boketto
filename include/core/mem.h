@@ -3,16 +3,13 @@
 #define BIOS_SIZE 0x4000
 #define EWRAM_SIZE 0x40000
 #define IWRAM_SIZE 0x8000
-#define IO_SIZE 0x3FF
 #define EWRAM_DSIZE (EWRAM_SIZE - 1)
 #define IWRAM_DSIZE (IWRAM_SIZE - 1)
-#define IO_DSIZE (IO_SIZE - 1)
 
 typedef struct {
   u8 bios[BIOS_SIZE];
   u8 iWRAM[IWRAM_SIZE];
   u8 eWRAM[EWRAM_SIZE];
-  u8 io[IO_SIZE];
   u8* rom;
   size_t rom_size;
   ppu_t ppu;

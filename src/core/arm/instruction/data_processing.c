@@ -43,7 +43,7 @@ arm_handler arm_handle_data_processing(u32 instruction) {
     case 0b0111: return &arm_unimplemented_data_processing;
     case 0b1000: return &arm_unimplemented_data_processing;
     case 0b1001: return &arm_unimplemented_data_processing;
-    case 0b1010: return &arm_unimplemented_data_processing;
+    case 0b1010: return &arm_cmp;
     case 0b1011: return &arm_unimplemented_data_processing;
     case 0b1100: return &arm_unimplemented_data_processing;
     case 0b1101: return &arm_mov;
@@ -51,6 +51,16 @@ arm_handler arm_handle_data_processing(u32 instruction) {
     case 0b1111: return &arm_unimplemented_data_processing;
     default: return &arm_undefined_data_processing;
   }
+}
+
+ARM_INSTRUCTION(cmp) {
+  u8 rn = bits(registers->instruction, 16, 19);
+  u32 op1 = registers->gpr[rn], op2 = shift_data_processing(registers);
+  u32 result = op1 - op2;
+  registers->cpsr.negative = bit(result, 31);
+  registers->cpsr.carry = result > op1;
+  registers->cpsr.zero = result == 0;
+  registers->cpsr.overflow = ((op1 >> 31) == (op2 >> 31)) && ((op1 >> 31) != (result >> 31));
 }
 
 ARM_INSTRUCTION(mov) {
