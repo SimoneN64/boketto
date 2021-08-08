@@ -3,9 +3,10 @@
 #include "mem.h"
 #include "scheduler.h"
 #include <nfd.h>
+#define infinite_loop while(1)
 
 typedef struct {
-	u64 cycles_ran;
+	u64 cycles;
 	bool running;
 	nfdchar_t* rom_file;
 	cpu_t cpu;
@@ -16,3 +17,4 @@ typedef struct {
 void init_core(core_t* core);
 void run_frame(core_t* core);
 void destroy_core(core_t* core);
+void dispatch_events(core_t* core);

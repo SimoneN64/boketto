@@ -2,11 +2,10 @@
 #include "common.h"
 #define ENTRIES_MAX 32
 
-typedef enum
-{
+typedef enum {
   None,
-  PPU,
-  Timer,
+  HBlank,
+  HDraw,
   Panic,
 } event_t;
 
