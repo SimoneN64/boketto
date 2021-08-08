@@ -1,11 +1,20 @@
 #include "ppu.h"
+#include "scheduler.h"
 #include <log.h>
 
-void init_ppu(ppu_t* ppu) {
+void init_ppu(ppu_t* ppu, scheduler_t* scheduler) {
   memset(ppu->vram, 0, VRAM_SIZE);
   memset(ppu->pram, 0, PRAM_SIZE);
   memset(ppu->oam, 0, OAM_SIZE);
-  ppu->io.dispcnt.raw = 0;
+  memset(ppu->framebuffer, 0, GBA_W * GBA_H * 2);
+  ppu->frame_finished = false;
+
+  ppu->io.dispcnt.raw = 0x6000;
+  ppu->io.dispstat.raw = 0;
+  ppu->io.vcount = 227;
+
+  entry_t hdraw_entry = { .event = HDraw, .time = 0 };
+  scheduler_push(scheduler, hdraw_entry);
 }
 
 u8 read8_io_ppu(ppu_t* ppu, u32 addr) {
@@ -85,7 +94,7 @@ void write32_io_ppu(ppu_t* ppu, u32 addr, u32 val) {
   switch(addr & 0xff) {
   case 0x0:
     ppu->io.dispcnt.raw = val & 0xff;
-    // undocumented next 2 bytes do idk what to do
+    // undocumented next 2 bytes do idk what to do 
     break;
   case 0x4:
     ppu->io.dispstat.raw = val & 0xff;
@@ -103,10 +112,46 @@ void write32_io_ppu(ppu_t* ppu, u32 addr, u32 val) {
   }
 }
 
-void step_ppu(ppu_t* ppu) {
+void hdraw_dispatch(ppu_t* ppu, const u64 time, scheduler_t* scheduler) {
+  ppu->io.dispstat.hb = 0;
+  ppu->io.vcount++;
 
+  switch (ppu->io.vcount) {
+  case 160:
+    ppu->io.dispstat.vb = 1;
+    break;
+  case 228:
+    ppu->frame_finished = true;
+    ppu->io.vcount = 0;
+    ppu->io.dispstat.vb = 0;
+    break;
+  }
+  
+  u8 mode = ppu->io.dispcnt.bg_mode;
+  switch(mode) {
+  case 0:
+    break;
+  case 3:
+    mode3(ppu);
+    break;
+  default:
+    logfatal("Unimplemented PPU mode! %d\n", mode);
+  }
+
+  entry_t hblank_entry = { .event = HBlank, .time = time + 960 };
+  scheduler_push(scheduler, hblank_entry);
+}
+
+void hblank_dispatch(ppu_t* ppu, const u64 time, scheduler_t* scheduler) {
+  ppu->io.dispstat.hb = 1;
+  entry_t hblank_entry = { .event = HDraw, .time = time + 272 };
+  scheduler_push(scheduler, hblank_entry);
 }
 
 void mode3(ppu_t* ppu) {
-
+  for(u8 x = 0; x < GBA_W; x++) {
+    u8 low_byte = ppu->vram[(GBA_W * ppu->io.vcount + x) << 1];
+    u8 high_byte = ppu->vram[(GBA_W * ppu->io.vcount + x) << 1 | 1];
+    ppu->framebuffer[GBA_W * ppu->io.vcount + x] = (high_byte << 8) | low_byte;
+  }
 }

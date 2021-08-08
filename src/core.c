@@ -4,9 +4,10 @@
 void init_core(core_t* core) {
 	core->cycles = 0;
 	core->running = false;
-  init_mem(&core->mem);
-	init_cpu(&core->cpu);
   init_scheduler(&core->scheduler);
+  init_mem(&core->mem);
+  init_ppu(&core->mem.ppu, &core->scheduler);
+	init_cpu(&core->cpu);
 }
 
 void destroy_core(core_t* core) {
@@ -14,17 +15,18 @@ void destroy_core(core_t* core) {
 }
 
 void run_frame(core_t* core) {
-	if(core->running) {
-	  infinite_loop {
-			step_cpu(&core->cpu, &core->mem);
-			core->cycles++;
-			if(core->scheduler.entries[0].time < core->cycles) {
-			  break;
-			}
-		}
+  core->mem.ppu.frame_finished = false;
+  if(core->running) {
+    while(!core->mem.ppu.frame_finished) {
+      while(core->cycles < core->scheduler.entries[0].time) {
+        step_cpu(&core->cpu, &core->mem);
+        core->cycles++;
+      }
 
-	  dispatch_events(core);
+      dispatch_events(core);
+    }
 	}
+  printf("Frame finished\n");
 }
 
 void dispatch_events(core_t* core) {
@@ -39,11 +41,11 @@ void dispatch_events(core_t* core) {
     case None:
       break;
     case HBlank:
-      //TODO: dispatch HBlank event
-      logfatal("HBlank\n");
+      hblank_dispatch(&core->mem.ppu, core->scheduler.entries[i].time, &core->scheduler);
+      break;
     case HDraw:
-      //TODO: dispatch HDraw event
-      logfatal("HDraw\n");
+      hdraw_dispatch(&core->mem.ppu, core->scheduler.entries[i].time, &core->scheduler);
+      break; 
     case Panic:
       logfatal("Panic event! Achievement unlocked: \"How did we get here?\"\n");
     }

@@ -6,7 +6,6 @@ void init_mem(mem_t* mem) {
   memset(mem->bios, 0, BIOS_SIZE);
   memset(mem->iWRAM, 0, IWRAM_SIZE);
   memset(mem->eWRAM, 0, EWRAM_SIZE);
-  init_ppu(&mem->ppu);
 }
 
 void load_rom(mem_t* mem, const char* path) {

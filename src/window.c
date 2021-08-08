@@ -14,7 +14,7 @@ void init_window(window_t* window, const char* title, int w, int h) {
     logfatal("%s\n", SDL_GetError());
 	}
 
-	window->texture = SDL_CreateTexture(window->renderer, SDL_PIXELFORMAT_ARGB1555, SDL_TEXTUREACCESS_STREAMING, GBA_W, GBA_H);
+	window->texture = SDL_CreateTexture(window->renderer, SDL_PIXELFORMAT_BGR555, SDL_TEXTUREACCESS_STREAMING, GBA_W, GBA_H);
 	if(window->texture == NULL) {
     logfatal("%s\n", SDL_GetError());
 	}
@@ -44,8 +44,8 @@ void main_loop(window_t* window, core_t* core) {
 
 		run_frame(core);
 
-		SDL_SetRenderDrawColor(window->renderer, 0, 0, 0, 0);
-		SDL_RenderClear(window->renderer);
+		SDL_UpdateTexture(window->texture, NULL, core->mem.ppu.framebuffer, GBA_W * sizeof(u16));
+		SDL_RenderCopy(window->renderer, window->texture, NULL, NULL);
 		SDL_RenderPresent(window->renderer);
 
 		SDL_Delay(1);

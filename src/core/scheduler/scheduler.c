@@ -2,13 +2,14 @@
 #include <string.h>
 
 void init_scheduler(scheduler_t* scheduler) {
-  for(int i = 0; i < ENTRIES_MAX; i++) {
-    scheduler->entries[i].event = None;
-    scheduler->entries[i].time = 0;
-  }
-
-  scheduler->entries[0].event = Panic;
   scheduler->entries[0].time = UINT64_MAX;
+  scheduler->entries[0].event = Panic;
+  scheduler->pos = 1;
+
+  for(int i = scheduler->pos; i < ENTRIES_MAX; i++) {
+    scheduler->entries[i].time = 0;
+    scheduler->entries[i].event = None;
+  }
 }
 
 void scheduler_push(scheduler_t* scheduler, entry_t entry) {
