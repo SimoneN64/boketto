@@ -82,6 +82,7 @@ u8 read_8(mem_t* mem, u32 addr) {
 
 u16 read_16(mem_t* mem, u32 addr) {
   u16 val = 0xffff;
+  assert((addr & 1) == 0);
   switch(addr) {
   case 0x00000000 ... 0x00003FFF:
     val = *(u16*)&mem->bios[addr];
@@ -131,6 +132,7 @@ u16 read_16(mem_t* mem, u32 addr) {
 
 u32 read_32(mem_t* mem, u32 addr) {
   u32 val = 0xffffffff;
+  assert((addr & 3) == 0);
   switch(addr) {
   case 0x00000000 ... 0x00003FFF:
     val = *(u32*)&mem->bios[addr];
@@ -217,6 +219,7 @@ void write_8(mem_t* mem, u32 addr, u8 val) {
 }
 
 void write_16(mem_t* mem, u32 addr, u16 val) {
+  assert((addr & 1) == 0);
   switch(addr) {
   case 0x00004000 ... 0x01FFFFFF:
     logdebug("[WARN][MEM] Open bus write! (%08X, %02X)\n", addr, val);
@@ -255,6 +258,7 @@ void write_16(mem_t* mem, u32 addr, u16 val) {
 }
 
 void write_32(mem_t* mem, u32 addr, u32 val) {
+  assert((addr & 3) == 0);
   switch(addr) {
   case 0x00004000 ... 0x01FFFFFF:
     logdebug("[WARN][MEM] Open bus write! (%08X, %02X)\n", addr, val);

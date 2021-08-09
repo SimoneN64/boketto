@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #define GBA_W 240
 #define GBA_H 160
-#define GBA_CYCLES_PER_FRAME 16777216 / 60
 
 typedef  uint8_t u8;
 typedef uint16_t u16;

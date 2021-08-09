@@ -1,4 +1,4 @@
-#include "status_register.h"
+#include "arm/instruction/status_register.h"
 #include "log.h"
 
 arm_handler arm_handle_status_register(u32 instruction) {

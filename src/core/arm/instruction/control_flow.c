@@ -1,4 +1,4 @@
-#include "control_flow.h"
+#include "arm/instruction/control_flow.h"
 #include "log.h"
 
 ARM_INSTRUCTION(b) {
@@ -13,6 +13,7 @@ ARM_INSTRUCTION(b) {
 ARM_INSTRUCTION(bx) {
   bool link = bit(registers->instruction, 5);
   u32 addr = registers->gpr[registers->instruction & 0xf];
+
   registers->cpsr.thumb = addr & 1;
   logdebug("b%sx %08X\n", link ? "l" : "", addr);
 
@@ -25,5 +26,6 @@ void set_pc(bool link, mem_t* mem, registers_t* registers, u32 value) {
   }
 
   registers->gpr[PC] = value;
+  registers->gpr[PC] &= ~1;
   flush_pipe_32(registers, mem);
 }

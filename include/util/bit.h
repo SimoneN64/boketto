@@ -12,4 +12,4 @@
 s32 sex(s32 number, u8 amount);
 size_t next_power_of_two(size_t number);
 
-char* binary_str(u32 number);
+char* binary_str(u32 number, u8 amount);

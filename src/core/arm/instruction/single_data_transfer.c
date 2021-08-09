@@ -1,4 +1,4 @@
-#include "single_data_transfer.h"
+#include "arm/instruction/single_data_transfer.h"
 #include "log.h"
 
 u32 shift_single_data_transfer(registers_t* regs) {
@@ -59,6 +59,8 @@ ARM_INSTRUCTION(strh) {
     address = U(instr) ? address + offset : address - offset;
   }
 
+  address &= ~1;
+
   write_16(mem, address, registers->gpr[rd(instr)]);
 
   if(W(instr) || !P(instr)) {
@@ -79,6 +81,8 @@ ARM_INSTRUCTION(ldrh) {
   bool I = B(instr); // STRH/LDRH's 'I' is STR/LDR's 'B'
   u32 address = registers->gpr[rn(instr)];
   u32 offset = I ? (bits(instr, 8, 11) << 4) | (instr & 0xf) : registers->gpr[rm(instr)];
+
+  address &= ~1;
 
   logdebug("ldrh r%d, [r%d, %08X]\n", rd(instr), rn(instr), offset);
 
@@ -116,6 +120,8 @@ ARM_INSTRUCTION(str) {
     address = U(instr) ? address + offset : address - offset;
   }
 
+  address &= ~3;
+
   if(B(instr)) {
     logfatal("strb!\n");
   } else {
@@ -146,6 +152,8 @@ ARM_INSTRUCTION(ldr) {
     address = U(instr) ? address + offset : address - offset;
   }
 
+  address &= ~3;
+
   if(B(instr)) {
     logfatal("ldrb!\n");
   } else {
@@ -170,9 +178,9 @@ ARM_INSTRUCTION(ldr) {
 }
 
 ARM_INSTRUCTION(undefined_single_data_transfer) {
-  logfatal("Undefined single data transfer instruction: (%08X) (%s)\n", registers->instruction, binary_str(registers->instruction));
+  logfatal("Undefined single data transfer instruction: (%08X) (%s)\n", registers->instruction, binary_str(registers->instruction, 32));
 }
 
 ARM_INSTRUCTION(unimplemented_single_data_transfer) {
-  logfatal("Unimplemented single data transfer instruction: (%08X) (%s)\n", registers->instruction, binary_str(registers->instruction));
+  logfatal("Unimplemented single data transfer instruction: (%08X) (%s)\n", registers->instruction, binary_str(registers->instruction, 32));
 }

@@ -1,4 +1,4 @@
-#include "data_processing.h"
+#include "arm/instruction/data_processing.h"
 #include "log.h"
 
 u32 shift_data_processing(registers_t* regs) {
@@ -100,9 +100,9 @@ ARM_INSTRUCTION(add) {
 }
 
 ARM_INSTRUCTION(undefined_data_processing) {
-  logfatal("Undefined data processing instruction: (%08X) (%s)\n", registers->instruction, binary_str(registers->instruction));
+  logfatal("Undefined data processing instruction: (%08X) (%s)\n", registers->instruction, binary_str(registers->instruction, 32));
 }
 
 ARM_INSTRUCTION(unimplemented_data_processing) {
-  logfatal("Unimplemented data processing instruction: (%08X) (%s)\n", registers->instruction, binary_str(registers->instruction));
+  logfatal("Unimplemented data processing instruction: (%08X) (%s)\n", registers->instruction, binary_str(registers->instruction, 32));
 }

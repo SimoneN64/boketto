@@ -22,7 +22,7 @@ typedef union {
 } psr_t;
 
 typedef struct {
-  u32 gpr[16], pipe[2], instruction;
+  u32 gpr[16], gpr_t[11], pipe[2], instruction;
   psr_t cpsr, spsr;
 } registers_t;
 

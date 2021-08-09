@@ -1,10 +1,11 @@
 #include "bit.h"
 
-char* binary_str(u32 number) {
-  char* result = (char*)malloc(40 * sizeof(char));
-  memset(result, 0, 40);
+char* binary_str(u32 number, u8 amount) {
+  u8 total = amount + (amount / 4);
+  char* result = (char*)malloc(total * sizeof(char));
+  memset(result, 0, total);
 
-  for(int j = 0, k = 39, i = (sizeof(u32) * 8) - 1; k >= 0; k--) {
+  for(int j = 0, k = total - 1, i = amount - 1; k >= 0; k--) {
     if(k % 5 == 0) {
       result[j] = '\'';
     } else {
@@ -15,7 +16,7 @@ char* binary_str(u32 number) {
     j++;
   }
 
-  result[39] = '\0';
+  result[total - 1] = '\0';
 
   return result;
 }
