@@ -6,7 +6,7 @@ void init_ppu(ppu_t* ppu, scheduler_t* scheduler) {
   memset(ppu->vram, 0, VRAM_SIZE);
   memset(ppu->pram, 0, PRAM_SIZE);
   memset(ppu->oam, 0, OAM_SIZE);
-  memset(ppu->framebuffer, 0, GBA_W * GBA_H * 2);
+  memset(ppu->framebuffer, 0, GBA_W * GBA_H * DEPTH);
   ppu->frame_finished = false;
 
   ppu->io.dispcnt.raw = 0x6000;
@@ -149,9 +149,8 @@ void hblank_dispatch(ppu_t* ppu, const u64 time, scheduler_t* scheduler) {
 }
 
 void mode3(ppu_t* ppu) {
-  for(u8 x = 0; x < GBA_W; x++) {
-    u8 low_byte = ppu->vram[(GBA_W * ppu->io.vcount + x) << 1];
-    u8 high_byte = ppu->vram[(GBA_W * ppu->io.vcount + x) << 1 | 1];
-    ppu->framebuffer[GBA_W * ppu->io.vcount + x] = (high_byte << 8) | low_byte;
+  for(int x = 0; x < GBA_W; x++) {
+    u32 base_addr = ppu->io.vcount * GBA_W + x;
+    *(u16*)&ppu->framebuffer[base_addr] = 0x8000 | *(u16*)&ppu->vram[base_addr];
   }
 }

@@ -103,7 +103,7 @@ u16 read_16(mem_t* mem, u32 addr) {
     logdebug("[INFO][MEM] Read (%04X) from PRAM (%08X)\n", val, addr);
     break;
   case 0x06000000 ... 0x06017FFF:
-    val = *(u16*)&mem->ppu.vram[addr & VRAM_DSIZE];
+    val = *(u16*)&mem->ppu.vram[addr & PRAM_DSIZE];
     logdebug("[INFO][MEM] Read (%04X) from VRAM (%08X)\n", val, addr);
     break;
   case 0x07000000 ... 0x070003FF:
@@ -148,7 +148,7 @@ u32 read_32(mem_t* mem, u32 addr) {
     logdebug("[INFO][MEM] Read (%08X) from PRAM (%08X)\n", val, addr);
     break;
   case 0x06000000 ... 0x06017FFF:
-    val = *(u32*)&mem->ppu.vram[addr & VRAM_DSIZE];
+    val = *(u32*)&mem->ppu.vram[addr & PRAM_DSIZE];
     logdebug("[INFO][MEM] Read (%08X) from VRAM (%08X)\n", val, addr);
     break;
   case 0x07000000 ... 0x070003FF:

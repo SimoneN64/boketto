@@ -58,9 +58,9 @@ ARM_INSTRUCTION(cmp) {
   u32 op1 = registers->gpr[rn], op2 = shift_data_processing(registers);
   u32 result = op1 - op2;
   registers->cpsr.negative = bit(result, 31);
-  registers->cpsr.carry = result > op1;
+  registers->cpsr.carry = result <= op1;
   registers->cpsr.zero = result == 0;
-  registers->cpsr.overflow = ((op1 >> 31) == (op2 >> 31)) && ((op1 >> 31) != (result >> 31));
+  registers->cpsr.overflow = ((op1 ^ result) & (~op2 ^ result)) >> 31;
 }
 
 ARM_INSTRUCTION(mov) {
@@ -69,8 +69,8 @@ ARM_INSTRUCTION(mov) {
   registers->gpr[rd] = shift_data_processing(registers);
 
   if(bit(registers->instruction, 20)) {
-    registers->cpsr.negative = bit(registers->gpr[rd], 31);
-    registers->cpsr.zero = registers->gpr[rd] == 0 ? 1 : 0;
+    registers->cpsr.negative = registers->gpr[rd] >> 31;
+    registers->cpsr.zero = registers->gpr[rd] == 0;
     if(rd == 15) {
       registers->cpsr.raw = registers->spsr.raw;
       flush_pipe_32(registers, mem);
@@ -84,13 +84,14 @@ ARM_INSTRUCTION(add) {
   logdebug("add r%d, r%d, %08X\n", rd, rn, shift_data_processing(registers));
   u32 op1 = shift_data_processing(registers);
   u32 op2 = registers->gpr[rn];
-  registers->gpr[rd] = op1 + op2;
+  u64 result = op1 + op2;
+  registers->gpr[rd] = result;
 
   if(bit(registers->instruction, 20)) {
-    registers->cpsr.negative = bit(registers->gpr[rd], 31);
-    registers->cpsr.zero = registers->gpr[rd] == 0 ? 1 : 0;
-    registers->cpsr.overflow = ((op1 >> 31) == (op2 >> 31)) && ((op1 >> 31) != (registers->gpr[rd] >> 31));
-    registers->cpsr.carry = (registers->gpr[rd] < op2) && (registers->gpr[rd] < op1);
+    registers->cpsr.negative = result >> 31;
+    registers->cpsr.zero = result == 0;
+    registers->cpsr.overflow = ((op1 ^ result) & (op2 ^ result)) >> 31;
+    registers->cpsr.carry = result >> 32;
     if(rd == 15) {
       registers->cpsr.raw = registers->spsr.raw;
       flush_pipe_32(registers, mem);

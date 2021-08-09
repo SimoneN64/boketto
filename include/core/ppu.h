@@ -8,6 +8,7 @@
 #define VRAM_DSIZE (VRAM_SIZE - 1)
 #define PRAM_DSIZE (PRAM_SIZE - 1)
 #define OAM_DSIZE (OAM_SIZE - 1)
+#define DEPTH 2
 
 typedef struct {
   dispcnt_t dispcnt;
@@ -21,7 +22,7 @@ typedef struct {
   u8 pram[0x400];
   u8 oam[0x400];
   io_t io;
-  u16 framebuffer[GBA_W * GBA_H];
+  u8 framebuffer[GBA_W * GBA_H * DEPTH];
   bool frame_finished;
 } ppu_t;
 

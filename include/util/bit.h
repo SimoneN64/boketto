@@ -7,6 +7,7 @@
 #define ror8(n, amt) (((n) >> (amt)) | ((n) << (8 - (amt))))
 #define ror16(n, amt) (((n) >> (amt)) | ((n) << (16 - (amt))))
 #define ror32(n, amt) (((n) >> (amt)) | ((n) << (32 - (amt))))
+#define color5_to_8(x) (((x) << 3) | ((x) >> 2))
 
 s32 sex(s32 number, u8 amount);
 size_t next_power_of_two(size_t number);

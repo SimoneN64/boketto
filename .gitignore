@@ -6,3 +6,4 @@ roms/
 *.ini
 vgcore.*
 .vscode/
+*.dump
