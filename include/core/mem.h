@@ -13,6 +13,7 @@ typedef struct {
   u8* rom;
   size_t rom_size;
   ppu_t ppu;
+  bool ime;
 } mem_t;
 
 void init_mem(mem_t* mem);

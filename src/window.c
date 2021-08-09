@@ -33,18 +33,20 @@ void main_loop(window_t* window, core_t* core) {
 	while(window->running) {
 		SDL_Event event;
 		SDL_PollEvent(&event);
-    switch(event.type) {
-    case SDL_QUIT: window->running = false; break;
-    case SDL_KEYDOWN:
-      switch(event.key.keysym.sym) {
-        case SDLK_o: open_file(core); break;
-      }
-      break;
-    }
+		switch(event.type) {
+		case SDL_QUIT: window->running = false; break;
+		case SDL_KEYDOWN:
+			switch(event.key.keysym.sym) {
+			case SDLK_o:
+				open_file(core);
+				break;
+			}
+			break;
+		}
 
 		run_frame(core);
 
-    SDL_UpdateTexture(window->texture, NULL, core->mem.ppu.framebuffer, GBA_W * DEPTH);
+		SDL_UpdateTexture(window->texture, NULL, core->mem.ppu.framebuffer, GBA_W * DEPTH);
 		SDL_RenderCopy(window->renderer, window->texture, NULL, NULL);
 		SDL_RenderPresent(window->renderer);
 

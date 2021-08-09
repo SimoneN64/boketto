@@ -2,12 +2,12 @@
 #include "bit.h"
 #include "lcd_io.h"
 #include "scheduler.h"
-#define VRAM_SIZE (0x18000)
-#define PRAM_SIZE (0x400)
-#define OAM_SIZE (0x400)
-#define VRAM_DSIZE (VRAM_SIZE - 1)
-#define PRAM_DSIZE (PRAM_SIZE - 1)
-#define OAM_DSIZE (OAM_SIZE - 1)
+#define VRAM_SIZE 0x18000
+#define PRAM_SIZE 0x400
+#define OAM_SIZE 0x400
+#define VRAM_DSIZE 0x1FFFF
+#define PRAM_DSIZE PRAM_SIZE - 1
+#define OAM_DSIZE OAM_SIZE - 1
 #define DEPTH 2
 
 typedef struct {
@@ -28,6 +28,7 @@ typedef struct {
 
 void init_ppu(ppu_t* ppu, scheduler_t* scheduler);
 void mode3(ppu_t* ppu);
+void mode4(ppu_t* ppu);
 void hdraw_dispatch(ppu_t* ppu, u64 time, scheduler_t* scheduler);
 void hblank_dispatch(ppu_t* ppu, u64 time, scheduler_t* scheduler);
 u8 read8_io_ppu(ppu_t* ppu, u32 addr);

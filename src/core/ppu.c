@@ -128,14 +128,19 @@ void hdraw_dispatch(ppu_t* ppu, const u64 time, scheduler_t* scheduler) {
   }
   
   u8 mode = ppu->io.dispcnt.bg_mode;
-  switch(mode) {
-  case 0:
-    break;
-  case 3:
-    mode3(ppu);
-    break;
-  default:
-    logfatal("Unimplemented PPU mode! %d\n", mode);
+  if (ppu->io.vcount < GBA_H) {
+    switch(mode) {
+    case 0:
+      break;
+    case 3:
+      mode3(ppu);
+      break;
+    case 4:
+      mode4(ppu);
+      break;
+    default:
+      logfatal("Unimplemented PPU mode! %d\n", mode);
+    }
   }
 
   entry_t hblank_entry = { .event = HBlank, .time = time + 960 };
@@ -149,8 +154,24 @@ void hblank_dispatch(ppu_t* ppu, const u64 time, scheduler_t* scheduler) {
 }
 
 void mode3(ppu_t* ppu) {
+  u32 bufferIndex = ppu->io.vcount * GBA_W * DEPTH;
   for(int x = 0; x < GBA_W; x++) {
-    u32 base_addr = ppu->io.vcount * GBA_W + x;
-    *(u16*)&ppu->framebuffer[base_addr] = 0x8000 | *(u16*)&ppu->vram[base_addr];
+    ppu->framebuffer[bufferIndex] = ppu->vram[bufferIndex];
+    ppu->framebuffer[bufferIndex + 1] = ppu->vram[bufferIndex + 1] | 0x80;
+
+    bufferIndex += DEPTH;
+  }
+}
+
+void mode4(ppu_t* ppu) {
+  u32 vramIndex = ppu->io.vcount * GBA_W;
+  u32 bufferIndex = vramIndex * DEPTH;
+  for(int x = 0; x < GBA_W; x++) {
+    const u32 paletteIndex = ppu->vram[vramIndex] * DEPTH;
+    ppu->framebuffer[bufferIndex] = ppu->pram[paletteIndex];
+    ppu->framebuffer[bufferIndex + 1] = ppu->pram[paletteIndex + 1];
+    
+    ++vramIndex;
+    bufferIndex += DEPTH;
   }
 }

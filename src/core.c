@@ -39,7 +39,7 @@ void dispatch_events(core_t* core) {
       last_pos = i;
       break;
     }
-
+    
     switch(core->scheduler.entries[0].event) {
     case None:
       break;
