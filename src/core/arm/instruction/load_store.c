@@ -1,4 +1,4 @@
-#include "arm/instruction/data_processing.h"
+#include "arm/instruction/load_store.h"
 #include "log.h"
 
 u32 shift_data_processing(registers_t* regs) {

@@ -26,6 +26,12 @@ void set_pc(bool link, mem_t* mem, registers_t* registers, u32 value) {
   }
 
   registers->gpr[PC] = value;
-  registers->gpr[PC] &= ~1;
-  flush_pipe_32(registers, mem);
+
+  if(registers->cpsr.thumb) {
+    registers->gpr[PC] &= ~1;
+    flush_pipe_16(registers, mem);
+  } else {
+    registers->gpr[PC] &= ~3;
+    flush_pipe_32(registers, mem);
+  }
 }

@@ -33,7 +33,7 @@ u32 fetch_32(registers_t* regs, mem_t* mem) {
 
 u16 fetch_16(registers_t* regs, mem_t* mem) {
   regs->gpr[PC] += 2;
-  u32 instruction = regs->pipe[0];
+  u16 instruction = regs->pipe[0];
   regs->pipe[0] = regs->pipe[1];
   regs->pipe[1] = read_16(mem, regs->gpr[PC]);
   return instruction;

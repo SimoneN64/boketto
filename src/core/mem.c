@@ -18,7 +18,7 @@ void load_rom(mem_t* mem, const char* path) {
   fseek(fp, 0, SEEK_END);
   size_t rom_size = ftell(fp);
   size_t rounded_rom_size = next_power_of_two(rom_size);
-  printf("Rom size: %zu (rounded to %zu)\n", rom_size, rounded_rom_size);
+  logdebug("Rom size: %zu (rounded to %zu)\n", rom_size, rounded_rom_size);
   mem->rom_size = rounded_rom_size;
   fseek(fp, 0, SEEK_SET);
 

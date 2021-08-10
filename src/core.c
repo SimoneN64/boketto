@@ -11,10 +11,6 @@ void init_core(core_t* core) {
 }
 
 void destroy_core(core_t* core) {
-  // dump vram
-  FILE* fp = fopen("vram.dump", "wb");
-  fwrite(core->mem.ppu.vram, 1, VRAM_SIZE, fp);
-  fclose(fp);
   core->running = false;
 }
 

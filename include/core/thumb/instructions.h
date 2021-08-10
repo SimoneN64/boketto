@@ -1,5 +1,5 @@
 #pragma once
-#include "thumb/instruction/data_processing.h"
+#include "thumb/instruction/load_store.h"
 
 THUMB_INSTRUCTION(undefined);
 THUMB_INSTRUCTION(unimplemented);
