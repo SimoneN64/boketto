@@ -9,7 +9,7 @@
 #define ror32(n, amt) (((n) >> (amt)) | ((n) << (32 - (amt))))
 #define color5_to_8(x) (((x) << 3) | ((x) >> 2))
 
-s32 sex(s32 number, u8 amount);
+s32 sign_extend32(s32 number, u8 amount);
 size_t next_power_of_two(size_t number);
 
 char* binary_str(u32 number, u8 amount);

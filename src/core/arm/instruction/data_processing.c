@@ -1,4 +1,4 @@
-#include "arm/instruction/load_store.h"
+#include "arm/instruction/data_processing.h"
 #include "log.h"
 
 u32 shift_data_processing(registers_t* regs) {
@@ -84,15 +84,15 @@ ARM_INSTRUCTION(add) {
   logdebug("add r%d, r%d, %08X\n", rd, rn, shift_data_processing(registers));
   u32 op1 = shift_data_processing(registers);
   u32 op2 = registers->gpr[rn];
-  u64 result = op1 + op2;
+  u32 result = op1 + op2;
   registers->gpr[rd] = result;
 
   if(bit(registers->instruction, 20)) {
     registers->cpsr.negative = result >> 31;
     registers->cpsr.zero = result == 0;
     registers->cpsr.overflow = ((op1 ^ result) & (op2 ^ result)) >> 31;
-    registers->cpsr.carry = result >> 32;
-    if(rd == 15) {
+    registers->cpsr.carry = (UINT32_MAX - op1) < op2;
+    if(rd == PC) {
       registers->cpsr.raw = registers->spsr.raw;
       flush_pipe_32(registers, mem);
     }

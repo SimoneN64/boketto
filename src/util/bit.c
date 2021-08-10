@@ -21,7 +21,7 @@ char* binary_str(u32 number, u8 amount) {
   return result;
 }
 
-s32 sex(s32 number, u8 amount) {
+s32 sign_extend32(s32 number, u8 amount) {
   return (number << (32 - amount)) >> (32 - amount);
 }
 

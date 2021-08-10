@@ -1,9 +1,10 @@
 #include "arm/instruction/control_flow.h"
 #include "log.h"
+#include "helpers.h"
 
 ARM_INSTRUCTION(b) {
   bool link = bit(registers->instruction, 24);
-  s32 addr = sex(registers->instruction & 0xFFFFFF, 24) << 2;
+  s32 addr = sign_extend32(registers->instruction & 0xFFFFFF, 24) << 2;
   
   logdebug("b%s %08X\n", link ? "l" : "", addr);
 
@@ -18,20 +19,4 @@ ARM_INSTRUCTION(bx) {
   logdebug("b%sx %08X\n", link ? "l" : "", addr);
 
   set_pc(link, mem, registers, addr);
-}
-
-void set_pc(bool link, mem_t* mem, registers_t* registers, u32 value) {
-  if(link) {
-    registers->gpr[LR] = registers->gpr[PC] - 4;
-  }
-
-  registers->gpr[PC] = value;
-
-  if(registers->cpsr.thumb) {
-    registers->gpr[PC] &= ~1;
-    flush_pipe_16(registers, mem);
-  } else {
-    registers->gpr[PC] &= ~3;
-    flush_pipe_32(registers, mem);
-  }
 }

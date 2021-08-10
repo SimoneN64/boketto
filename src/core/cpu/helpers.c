@@ -21,3 +21,19 @@ bool get_condition(psr_t psr, u8 cond) {
     case 0b1111: logfatal("NV condition should never happen!\n");
   }
 }
+
+void set_pc(bool link, mem_t* mem, registers_t* registers, u32 value) {
+  if(link) {
+    registers->gpr[LR] = registers->gpr[PC] - 4;
+  }
+
+  registers->gpr[PC] = value;
+
+  if(registers->cpsr.thumb) {
+    registers->gpr[PC] &= ~1;
+    flush_pipe_16(registers, mem);
+  } else {
+    registers->gpr[PC] &= ~3;
+    flush_pipe_32(registers, mem);
+  }
+}
