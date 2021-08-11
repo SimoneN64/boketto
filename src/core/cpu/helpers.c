@@ -23,8 +23,9 @@ bool get_condition(psr_t psr, u8 cond) {
 }
 
 void set_pc(bool link, mem_t* mem, registers_t* registers, u32 value) {
+  bool thumb = registers->cpsr.thumb;
   if(link) {
-    registers->gpr[LR] = registers->gpr[PC] - 4;
+    registers->gpr[LR] = registers->gpr[PC] - (thumb ? 4 : 1);
   }
 
   registers->gpr[PC] = value;

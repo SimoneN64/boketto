@@ -32,7 +32,8 @@ THUMB_INSTRUCTION(bl_high) {
 THUMB_INSTRUCTION(bl_low) {
   u16 offset = registers->instruction & 0x7FF;
   logdebug("bl[h == 0b11] %08X\n", offset);
-  set_pc(true, mem, registers, registers->gpr[LR] + (offset << 1));
+  registers->gpr[LR] = registers->gpr[PC] - 1;
+  set_pc(false, mem, registers, registers->gpr[LR] + (offset << 1));
 }
 
 THUMB_INSTRUCTION(unimplemented_control_flow) {
