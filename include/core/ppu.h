@@ -14,6 +14,8 @@ typedef struct {
   dispcnt_t dispcnt;
   dispstat_t dispstat;
   bgcnt_t bg0cnt, bg1cnt, bg2cnt, bg3cnt;
+  bgvofs_t bg0vofs, bg1vofs, bg2vofs, bg3vofs;
+  u16 bg0hofs, bg1hofs, bg2hofs, bg3hofs;
   u16 vcount;
 } io_t;
 

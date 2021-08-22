@@ -13,9 +13,15 @@ ARM_INSTRUCTION(b) {
 
 ARM_INSTRUCTION(bx) {
   bool link = bit(registers->instruction, 5);
-  u32 addr = registers->gpr[registers->instruction & 0xf];
+  u8 rm = registers->instruction & 0xf;
 
-  registers->cpsr.thumb = addr & 1;
+  bool thumb = registers->cpsr.thumb = registers->gpr[rm] & 1;
+  u32 addr;
+  if(thumb) {
+    addr = registers->gpr[rm] & ~1;
+  } else {
+    addr = registers->gpr[rm] & ~3;
+  }
   logdebug("b%sx %08X\n", link ? "l" : "", addr);
 
   set_pc(link, mem, registers, addr);

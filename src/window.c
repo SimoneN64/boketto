@@ -2,28 +2,28 @@
 #include "log.h"
 
 void init_window(window_t* window, const char* title, int w, int h) {
-	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+	SDL_Init(SDL_INIT_VIDEO);
 
 	window->window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 	if(window->window == NULL) {
-		logfatal("%s\n", SDL_GetError());
+		logfatal("Window couldn't initialize: %s\n", SDL_GetError());
 	}
 
-	window->renderer = SDL_CreateRenderer(window->window, 0, SDL_RENDERER_ACCELERATED);
+	window->renderer = SDL_CreateRenderer(window->window, -1, SDL_RENDERER_ACCELERATED);
 	if(window->renderer == NULL) {
-    logfatal("%s\n", SDL_GetError());
+    logfatal("Renderer couldn't initialize: %s\n", SDL_GetError());
 	}
 
 	window->texture = SDL_CreateTexture(window->renderer, SDL_PIXELFORMAT_ABGR1555, SDL_TEXTUREACCESS_STREAMING, GBA_W, GBA_H);
 	if(window->texture == NULL) {
-    logfatal("%s\n", SDL_GetError());
+	  logfatal("Texture couldn't initialize: %s\n", SDL_GetError());
 	}
 
 	window->running = true;
 
 	int err = SDL_RenderSetLogicalSize(window->renderer, GBA_W, GBA_H);
 	if(err < 0) {
-    logfatal("%s\n", SDL_GetError());
+	  logfatal("Renderer couldn't set logical size: %s\n", SDL_GetError());
 	}
 
 	NFD_Init();

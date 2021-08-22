@@ -57,7 +57,7 @@ ARM_INSTRUCTION(cmp) {
   u8 rn = bits(registers->instruction, 16, 19);
   u32 op1 = registers->gpr[rn], op2 = shift_data_processing(registers);
   u32 result = op1 - op2;
-  registers->cpsr.negative = bit(result, 31);
+  registers->cpsr.negative = result >> 31;
   registers->cpsr.carry = result <= op1;
   registers->cpsr.zero = result == 0;
   registers->cpsr.overflow = ((op1 ^ result) & (~op2 ^ result)) >> 31;

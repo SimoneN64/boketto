@@ -19,64 +19,84 @@ void init_ppu(ppu_t* ppu, scheduler_t* scheduler) {
 
 u8 read8_io_ppu(ppu_t* ppu, u32 addr) {
   switch(addr & 0xff) {
-  case 0x0: return ppu->io.dispcnt.raw & 0xff;
-  case 0x1: return ppu->io.dispcnt.raw >> 8;
-  case 0x4: return ppu->io.dispstat.raw & 0xff;
-  case 0x5: return ppu->io.dispstat.raw >> 8;
-  case 0x6: return ppu->io.vcount & 0xff;
-  case 0x7: return ppu->io.vcount >> 8;
-  case 0x8: return ppu->io.bg0cnt.raw & 0xff;
-  case 0x9: return ppu->io.bg0cnt.raw >> 8;
-  case 0xA: return ppu->io.bg1cnt.raw & 0xff;
-  case 0xB: return ppu->io.bg1cnt.raw >> 8;
-  case 0xC: return ppu->io.bg2cnt.raw & 0xff;
-  case 0xD: return ppu->io.bg2cnt.raw >> 8;
-  case 0xE: return ppu->io.bg3cnt.raw & 0xff;
-  case 0xF: return ppu->io.bg3cnt.raw >> 8;
-  default: logfatal("Unhandled LCD IO (addr: %08X)!\n", addr);
+  case 0x00: return ppu->io.dispcnt.raw & 0xff;
+  case 0x01: return ppu->io.dispcnt.raw >> 8;
+  case 0x04: return ppu->io.dispstat.raw & 0xff;
+  case 0x05: return ppu->io.dispstat.raw >> 8;
+  case 0x06: return ppu->io.vcount & 0xff;
+  case 0x07: return ppu->io.vcount >> 8;
+  case 0x08: return ppu->io.bg0cnt.raw & 0xff;
+  case 0x09: return ppu->io.bg0cnt.raw >> 8;
+  case 0x0A: return ppu->io.bg1cnt.raw & 0xff;
+  case 0x0B: return ppu->io.bg1cnt.raw >> 8;
+  case 0x0C: return ppu->io.bg2cnt.raw & 0xff;
+  case 0x0D: return ppu->io.bg2cnt.raw >> 8;
+  case 0x0E: return ppu->io.bg3cnt.raw & 0xff;
+  case 0x0F: return ppu->io.bg3cnt.raw >> 8;
   }
 }
 
 void write8_io_ppu(ppu_t* ppu, u32 addr, u8 val) {
   switch(addr & 0xff) {
-  case 0x0: ppu->io.dispcnt.raw = (ppu->io.dispcnt.raw & 0xff00) | val; break;
-  case 0x1: ppu->io.dispcnt.raw = ((u16)val << 8) | (ppu->io.dispcnt.raw & 0xff); break;
-  case 0x4: ppu->io.dispstat.raw = (ppu->io.dispstat.raw & 0xff00) | val; break;
-  case 0x5: ppu->io.dispstat.raw = ((u16)val << 8)  | (ppu->io.dispstat.raw & 0xff); break;
-  case 0x8: ppu->io.bg0cnt.raw = (ppu->io.bg0cnt.raw & 0xff00) | val; break;
-  case 0x9: ppu->io.bg0cnt.raw = ((u16)val << 8) | (ppu->io.bg0cnt.raw & 0xff); break;
-  case 0xA: ppu->io.bg1cnt.raw = (ppu->io.bg1cnt.raw & 0xff00) | val; break;
-  case 0xB: ppu->io.bg1cnt.raw = ((u16)val << 8) | (ppu->io.bg1cnt.raw & 0xff); break;
-  case 0xC: ppu->io.bg2cnt.raw = (ppu->io.bg2cnt.raw & 0xff00) | val; break;
-  case 0xD: ppu->io.bg2cnt.raw = ((u16)val << 8) | (ppu->io.bg2cnt.raw & 0xff); break;
-  case 0xE: ppu->io.bg3cnt.raw = (ppu->io.bg3cnt.raw & 0xff00) | val; break;
-  case 0xF: ppu->io.bg3cnt.raw = ((u16)val << 8) | (ppu->io.bg3cnt.raw & 0xff); break;
-  default: logfatal("Unhandled LCD IO (addr: %08X, val: %02X)!\n", addr, val);
+  case 0x00: ppu->io.dispcnt.raw = (ppu->io.dispcnt.raw & 0xff00) | val; break;
+  case 0x01: ppu->io.dispcnt.raw = ((u16)val << 8) | (ppu->io.dispcnt.raw & 0xff); break;
+  case 0x04: ppu->io.dispstat.raw = (ppu->io.dispstat.raw & 0xff00) | val; break;
+  case 0x05: ppu->io.dispstat.raw = ((u16)val << 8)  | (ppu->io.dispstat.raw & 0xff); break;
+  case 0x08: ppu->io.bg0cnt.raw = (ppu->io.bg0cnt.raw & 0xff00) | val; break;
+  case 0x09: ppu->io.bg0cnt.raw = ((u16)val << 8) | (ppu->io.bg0cnt.raw & 0xff); break;
+  case 0x0A: ppu->io.bg1cnt.raw = (ppu->io.bg1cnt.raw & 0xff00) | val; break;
+  case 0x0B: ppu->io.bg1cnt.raw = ((u16)val << 8) | (ppu->io.bg1cnt.raw & 0xff); break;
+  case 0x0C: ppu->io.bg2cnt.raw = (ppu->io.bg2cnt.raw & 0xff00) | val; break;
+  case 0x0D: ppu->io.bg2cnt.raw = ((u16)val << 8) | (ppu->io.bg2cnt.raw & 0xff); break;
+  case 0x0E: ppu->io.bg3cnt.raw = (ppu->io.bg3cnt.raw & 0xff00) | val; break;
+  case 0x0F: ppu->io.bg3cnt.raw = ((u16)val << 8) | (ppu->io.bg3cnt.raw & 0xff); break;
+  case 0x10: ppu->io.bg0hofs = (ppu->io.bg0cnt.raw & 0xff00) | val; break;
+  case 0x11: ppu->io.bg0hofs = ((u16)val << 8) | (ppu->io.bg0cnt.raw & 0xff); break;
+  case 0x12: ppu->io.bg0vofs.raw = (ppu->io.bg1cnt.raw & 0xff00) | val; break;
+  case 0x13: ppu->io.bg0vofs.raw = ((u16)val << 8) | (ppu->io.bg1cnt.raw & 0xff); break;
+  case 0x14: ppu->io.bg1hofs = (ppu->io.bg2cnt.raw & 0xff00) | val; break;
+  case 0x15: ppu->io.bg1hofs = ((u16)val << 8) | (ppu->io.bg2cnt.raw & 0xff); break;
+  case 0x16: ppu->io.bg1vofs.raw = (ppu->io.bg3cnt.raw & 0xff00) | val; break;
+  case 0x17: ppu->io.bg1vofs.raw = ((u16)val << 8) | (ppu->io.bg3cnt.raw & 0xff); break;
+  case 0x18: ppu->io.bg2hofs = (ppu->io.bg0cnt.raw & 0xff00) | val; break;
+  case 0x19: ppu->io.bg2hofs = ((u16)val << 8) | (ppu->io.bg0cnt.raw & 0xff); break;
+  case 0x1A: ppu->io.bg2vofs.raw = (ppu->io.bg1cnt.raw & 0xff00) | val; break;
+  case 0x1B: ppu->io.bg2vofs.raw = ((u16)val << 8) | (ppu->io.bg1cnt.raw & 0xff); break;
+  case 0x1C: ppu->io.bg3hofs = (ppu->io.bg2cnt.raw & 0xff00) | val; break;
+  case 0x1D: ppu->io.bg3hofs = ((u16)val << 8) | (ppu->io.bg2cnt.raw & 0xff); break;
+  case 0x1E: ppu->io.bg3vofs.raw = (ppu->io.bg3cnt.raw & 0xff00) | val; break;
+  case 0x1F: ppu->io.bg3vofs.raw = ((u16)val << 8) | (ppu->io.bg3cnt.raw & 0xff); break;
   }
 }
 
 u16 read16_io_ppu(ppu_t* ppu, u32 addr) {
   switch(addr & 0xff) {
-  case 0x0: return ppu->io.dispcnt.raw;
-  case 0x4: return ppu->io.dispstat.raw;
-  case 0x6: return ppu->io.vcount;
-  case 0x8: return ppu->io.bg0cnt.raw;
-  case 0xA: return ppu->io.bg1cnt.raw;
-  case 0xC: return ppu->io.bg2cnt.raw;
-  case 0xE: return ppu->io.bg3cnt.raw;
-  default: logfatal("Unhandled LCD IO (addr: %08X)!\n", addr);
+  case 0x00: return ppu->io.dispcnt.raw;
+  case 0x04: return ppu->io.dispstat.raw;
+  case 0x06: return ppu->io.vcount;
+  case 0x08: return ppu->io.bg0cnt.raw;
+  case 0x0A: return ppu->io.bg1cnt.raw;
+  case 0x0C: return ppu->io.bg2cnt.raw;
+  case 0x0E: return ppu->io.bg3cnt.raw;
   }
 }
 
 void write16_io_ppu(ppu_t* ppu, u32 addr, u16 val) {
   switch(addr & 0xff) {
-  case 0x0: ppu->io.dispcnt.raw = val; break;
-  case 0x4: ppu->io.dispstat.raw = val; break;
-  case 0x8: ppu->io.bg0cnt.raw = val; break;
-  case 0xA: ppu->io.bg1cnt.raw = val; break;
-  case 0xC: ppu->io.bg2cnt.raw = val; break;
-  case 0xE: ppu->io.bg3cnt.raw = val; break;
-  default: logfatal("Unhandled LCD IO (addr: %08X, val: %02X)!\n", addr, val);
+  case 0x00: ppu->io.dispcnt.raw = val; break;
+  case 0x04: ppu->io.dispstat.raw = val; break;
+  case 0x08: ppu->io.bg0cnt.raw = val; break;
+  case 0x0A: ppu->io.bg1cnt.raw = val; break;
+  case 0x0C: ppu->io.bg2cnt.raw = val; break;
+  case 0x0E: ppu->io.bg3cnt.raw = val; break;
+  case 0x10: ppu->io.bg0hofs = val; break;
+  case 0x12: ppu->io.bg0vofs.raw = val; break;
+  case 0x14: ppu->io.bg1hofs = val; break;
+  case 0x16: ppu->io.bg1vofs.raw = val; break;
+  case 0x18: ppu->io.bg2hofs = val; break;
+  case 0x1A: ppu->io.bg2vofs.raw = val; break;
+  case 0x1C: ppu->io.bg3hofs = val; break;
+  case 0x1E: ppu->io.bg3cnt.raw = val; break;
   }
 }
 
@@ -86,29 +106,43 @@ u32 read32_io_ppu(ppu_t* ppu, u32 addr) {
   case 0x4: return (((u32)ppu->io.dispstat.raw) << 16) | ppu->io.vcount;
   case 0x8: return (((u32)ppu->io.bg0cnt.raw) << 16) | ppu->io.bg1cnt.raw;
   case 0xC: return (((u32)ppu->io.bg2cnt.raw) << 16) | ppu->io.bg3cnt.raw;
-  default: logfatal("Unhandled LCD IO (addr: %08X)!\n", addr);
   }
 }
 
 void write32_io_ppu(ppu_t* ppu, u32 addr, u32 val) {
   switch(addr & 0xff) {
-  case 0x0:
-    ppu->io.dispcnt.raw = val & 0xff;
+  case 0x00:
+    ppu->io.dispcnt.raw = val & 0xffff;
     // undocumented next 2 bytes do idk what to do 
     break;
-  case 0x4:
-    ppu->io.dispstat.raw = val & 0xff;
+  case 0x04:
+    ppu->io.dispstat.raw = val & 0xffff;
     // VCOUNT is read-only
     break;
-  case 0x8:
-    ppu->io.bg0cnt.raw = val & 0xff;
-    ppu->io.bg1cnt.raw = val >> 8;
+  case 0x08:
+    ppu->io.bg0cnt.raw = val & 0xffff;
+    ppu->io.bg1cnt.raw = val >> 16;
     break;
-  case 0xC:
-    ppu->io.bg2cnt.raw = val & 0xff;
-    ppu->io.bg3cnt.raw = val >> 8;
+  case 0x0C:
+    ppu->io.bg2cnt.raw = val & 0xffff;
+    ppu->io.bg3cnt.raw = val >> 16;
     break;
-  default: logfatal("Unhandled LCD IO (addr: %08X, val: %02X)!\n", addr, val);
+  case 0x10:
+    ppu->io.bg0hofs = val & 0xffff;
+    ppu->io.bg0vofs.raw = val >> 16;
+    break;
+  case 0x14:
+    ppu->io.bg1hofs = val & 0xffff;
+    ppu->io.bg1vofs.raw = val >> 16;
+    break;
+  case 0x18:
+    ppu->io.bg2hofs = val & 0xffff;
+    ppu->io.bg2vofs.raw = val >> 16;
+    break;
+  case 0x1C:
+    ppu->io.bg3hofs = val & 0xffff;
+    ppu->io.bg3vofs.raw = val >> 16;
+    break;
   }
 }
 
@@ -156,8 +190,7 @@ void hblank_dispatch(ppu_t* ppu, const u64 time, scheduler_t* scheduler) {
 void mode3(ppu_t* ppu) {
   u32 bufferIndex = ppu->io.vcount * GBA_W * DEPTH;
   for(int x = 0; x < GBA_W; x++) {
-    ppu->framebuffer[bufferIndex] = ppu->vram[bufferIndex];
-    ppu->framebuffer[bufferIndex + 1] = ppu->vram[bufferIndex + 1] | 0x80;
+    *(u16*)&ppu->framebuffer[bufferIndex] = *(u16*)&ppu->vram[bufferIndex];
 
     bufferIndex += DEPTH;
   }
@@ -168,8 +201,7 @@ void mode4(ppu_t* ppu) {
   u32 bufferIndex = vramIndex * DEPTH;
   for(int x = 0; x < GBA_W; x++) {
     const u32 paletteIndex = ppu->vram[vramIndex] * DEPTH;
-    ppu->framebuffer[bufferIndex] = ppu->pram[paletteIndex];
-    ppu->framebuffer[bufferIndex + 1] = ppu->pram[paletteIndex + 1];
+    *(u16*)&ppu->framebuffer[bufferIndex] = *(u16*)&ppu->vram[paletteIndex];
     
     ++vramIndex;
     bufferIndex += DEPTH;

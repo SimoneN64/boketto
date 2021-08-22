@@ -46,8 +46,6 @@ endif()
 #add_link_options(-fsanitize=address)
 
 add_executable(${CMAKE_PROJECT_NAME}
-  ${IMGUI_SRC}
-  ${IMPLOT_SRC}
   ${EMU_SRC}
 )
 

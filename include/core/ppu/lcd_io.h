@@ -51,3 +51,12 @@ typedef union {
 
   u16 raw;
 } bgcnt_t;
+
+typedef union {
+  struct {
+    unsigned offset:9;
+    unsigned:7;
+  };
+
+  u16 raw;
+} bgvofs_t;

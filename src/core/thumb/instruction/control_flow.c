@@ -4,8 +4,8 @@
 
 THUMB_INSTRUCTION(bcond) {
   u8 cond = bits(registers->instruction, 8, 11);
-  s8 imm = (registers->instruction & 0xff) << 1;
-  s32 addr = sign_extend32(imm, 8);
+  s16 imm = (registers->instruction & 0xff) << 1;
+  s32 addr = sign_extend32(imm, 9);
   logdebug("b %08X\n", addr);
   if(get_condition(registers->cpsr, cond)) {
     logdebug("Condition passed!\n");
@@ -17,8 +17,13 @@ THUMB_INSTRUCTION(bcond) {
 
 THUMB_INSTRUCTION(bx) {
   u8 rm = (registers->instruction >> 3) & 0xf;
-  registers->cpsr.thumb = registers->gpr[rm] & 1;
-  u32 addr = (registers->gpr[rm] & ~1) << 1;
+  bool thumb = registers->cpsr.thumb = registers->gpr[rm] & 1;
+  u32 addr;
+  if(thumb) {
+    addr = registers->gpr[rm] & ~1;
+  } else {
+    addr = registers->gpr[rm] & ~3;
+  }
   logdebug("bx r%d\n", rm);
   set_pc(false, mem, registers, addr);
 }
@@ -32,8 +37,9 @@ THUMB_INSTRUCTION(bl_high) {
 THUMB_INSTRUCTION(bl_low) {
   u16 offset = registers->instruction & 0x7FF;
   logdebug("bl[h == 0b11] %08X\n", offset);
-  registers->gpr[LR] = registers->gpr[PC] - 1;
+  u32 pc = registers->gpr[PC];
   set_pc(false, mem, registers, registers->gpr[LR] + (offset << 1));
+  registers->gpr[LR] = (pc - 2) | 1;
 }
 
 THUMB_INSTRUCTION(unimplemented_control_flow) {

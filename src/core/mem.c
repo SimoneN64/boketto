@@ -45,11 +45,11 @@ u8 read_8(mem_t* mem, u32 addr) {
     val = mem->eWRAM[addr & EWRAM_DSIZE];
     logdebug("[INFO][MEM] Read (%02X) from eWRAM (%08X)\n", val, addr);
     break;
-  case 0x03000000 ... 0x03007FFF:
+  case 0x03000000 ... 0x03FFFFFF:
     val = mem->iWRAM[addr & IWRAM_DSIZE];
     logdebug("[INFO][MEM] Read (%02X) from iWRAM (%08X)\n", val, addr);
     break;
-  case 0x04000000 ... 0x04000056:
+  case 0x04000000 ... 0x04000058:
     val = read8_io_ppu(&mem->ppu, addr);
     logdebug("[INFO][MEM] Read (%02X) from IO (%08X)\n", val, addr);
     break;
@@ -95,11 +95,11 @@ u16 read_16(mem_t* mem, u32 addr) {
     val = *(u16*)&mem->eWRAM[addr & EWRAM_DSIZE];
     logdebug("[INFO][MEM] Read (%04X) from eWRAM (%08X)\n", val, addr);
     break;
-  case 0x03000000 ... 0x03007FFF:
+  case 0x03000000 ... 0x03FFFFFF:
     val = *(u16*)&mem->iWRAM[addr & IWRAM_DSIZE];
     logdebug("[INFO][MEM] Read (%04X) from iWRAM (%08X)\n", val, addr);
     break;
-  case 0x04000000 ... 0x04000056:
+  case 0x04000000 ... 0x04000058:
     val = read16_io_ppu(&mem->ppu, addr);
     logdebug("[INFO][MEM] Read (%04X) from IO (%08X)\n", val, addr);
     break;
@@ -145,11 +145,11 @@ u32 read_32(mem_t* mem, u32 addr) {
     val = *(u32*)&mem->eWRAM[addr & EWRAM_DSIZE];
     logdebug("[INFO][MEM] Read (%08X) from eWRAM (%08X)\n", val, addr);
     break;
-  case 0x03000000 ... 0x03007FFF:
+  case 0x03000000 ... 0x03FFFFFF:
     val = *(u32*)&mem->iWRAM[addr & IWRAM_DSIZE];
     logdebug("[INFO][MEM] Read (%08X) from iWRAM (%08X)\n", val, addr);
     break;
-  case 0x04000000 ... 0x04000056:
+  case 0x04000000 ... 0x04000058:
     val = read32_io_ppu(&mem->ppu, addr);
     logdebug("[INFO][MEM] Read (%08X) from IO (%08X)\n", val, addr);
     break;
@@ -189,11 +189,11 @@ void write_8(mem_t* mem, u32 addr, u8 val) {
     logdebug("[INFO][MEM] Write (%02X) to eWRAM (%08X)\n", val, addr);
     mem->eWRAM[addr & EWRAM_DSIZE] = val;
     break;
-  case 0x03000000 ... 0x03007FFF:
+  case 0x03000000 ... 0x03FFFFFF:
     logdebug("[INFO][MEM] Write (%02X) to iWRAM (%08X)\n", val, addr);
     mem->iWRAM[addr & IWRAM_DSIZE] = val;
     break;
-  case 0x04000000 ... 0x04000056:
+  case 0x04000000 ... 0x04000058:
     logdebug("[INFO][MEM] Write (%02X) to IO (%08X)\t[WARN] STUB!\n", val, addr);
     write8_io_ppu(&mem->ppu, addr, val);
     break;
@@ -228,11 +228,11 @@ void write_16(mem_t* mem, u32 addr, u16 val) {
     logdebug("[INFO][MEM] Write (%04X) to eWRAM (%08X)\n", val, addr);
     *(u16*)&mem->eWRAM[addr & EWRAM_DSIZE] = val;
     break;
-  case 0x03000000 ... 0x03007FFF:
+  case 0x03000000 ... 0x03FFFFFF:
     logdebug("[INFO][MEM] Write (%04X) to iWRAM (%08X)\n", val, addr);
     *(u16*)&mem->iWRAM[addr & IWRAM_DSIZE] = val;
     break;
-  case 0x04000000 ... 0x04000056:
+  case 0x04000000 ... 0x04000058:
     logdebug("[INFO][MEM] Write (%04X) to IO (%08X)\t[WARN] STUB!\n", val, addr);
     write16_io_ppu(&mem->ppu, addr, val);
     break;
@@ -267,11 +267,11 @@ void write_32(mem_t* mem, u32 addr, u32 val) {
     logdebug("[INFO][MEM] Write (%08X) to eWRAM (%08X)\n", val, addr);
     *(u32*)&mem->eWRAM[addr & EWRAM_DSIZE] = val;
     break;
-  case 0x03000000 ... 0x03007FFF:
+  case 0x03000000 ... 0x03FFFFFF:
     logdebug("[INFO][MEM] Write (%08X) to iWRAM (%08X)\n", val, addr);
     *(u32*)&mem->iWRAM[addr & IWRAM_DSIZE] = val;
     break;
-  case 0x04000000 ... 0x04000056:
+  case 0x04000000 ... 0x04000058:
     logdebug("[INFO][MEM] Write (%08X) to IO (%08X)\t[WARN] STUB!\n", val, addr);
     write32_io_ppu(&mem->ppu, addr, val);
     break;
