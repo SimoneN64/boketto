@@ -1,5 +1,5 @@
-#include "arm/instruction/status_register.h"
-#include "log.h"
+#include <arm/instruction/status_register.h>
+#include <log.h>
 
 arm_handler arm_handle_status_register(u32 instruction) {
   if(bit(instruction, 21)) {
@@ -10,6 +10,7 @@ arm_handler arm_handle_status_register(u32 instruction) {
 }
 
 ARM_INSTRUCTION(msr) {
+  bool privileged = registers->cpsr.mode != 0x10;
   u32 operand = 0;
   char operand_str[8];
   if(bit(registers->instruction, 25)) {
@@ -20,21 +21,27 @@ ARM_INSTRUCTION(msr) {
     snprintf(operand_str, 8, "r%d", registers->instruction & 0xf);
   }
 
-  u32 byte_mask = (bit(registers->instruction, 16) * 0x000000FF) |
-                  (bit(registers->instruction, 17) * 0x0000FF00) |
-                  (bit(registers->instruction, 18) * 0x00FF0000) |
-                  (bit(registers->instruction, 19) * 0xFF000000);
+  u32 mask = (bit(registers->instruction, 16) && privileged) * 0x000000ff
+           | (bit(registers->instruction, 19) * 0xf0000000);
+
   if(bit(registers->instruction, 22)) {
-    u32 mask = byte_mask & (0xF0000000 | 0x0000000F | 0x00000020);
     registers->spsr.raw = (registers->spsr.raw & ~mask) | (operand & mask);
     logdebug("msr spsr, %s\n", operand_str);
   } else {
-    u32 mask = byte_mask & 0xF0000000;
-    registers->cpsr.raw = (registers->cpsr.raw & ~mask) | (operand & mask);
+    u32 val = (registers->cpsr.raw & ~mask) | (operand & mask);
+    change_mode(registers, val & 0x1f);
+    registers->cpsr.raw = val;
     logdebug("msr cpsr, %s\n", operand_str);
   }
 }
 
 ARM_INSTRUCTION(mrs) {
-  logfatal("Unimplemented MRS\n");
+  u8 rd = (registers->instruction >> 12) & 0xf;
+  if(bit(registers->instruction, 22)) {
+    registers->gpr[rd] = registers->spsr.raw;
+    logdebug("msr r%d, spsr\n", rd);
+  } else {
+    registers->gpr[rd] = registers->cpsr.raw;
+    logdebug("msr r%d, cpsr\n", rd);
+  }
 }

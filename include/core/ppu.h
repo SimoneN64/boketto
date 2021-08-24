@@ -24,7 +24,7 @@ typedef struct {
   u8 pram[0x400];
   u8 oam[0x400];
   io_t io;
-  u8 framebuffer[GBA_W * GBA_H * DEPTH];
+  u16 framebuffer[GBA_W * GBA_H];
   bool frame_finished;
 } ppu_t;
 

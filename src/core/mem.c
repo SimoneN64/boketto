@@ -194,7 +194,7 @@ void write_8(mem_t* mem, u32 addr, u8 val) {
     mem->iWRAM[addr & IWRAM_DSIZE] = val;
     break;
   case 0x04000000 ... 0x04000058:
-    logdebug("[INFO][MEM] Write (%02X) to IO (%08X)\t[WARN] STUB!\n", val, addr);
+    logdebug("[INFO][MEM] Write (%02X) to IO (%08X)\n", val, addr);
     write8_io_ppu(&mem->ppu, addr, val);
     break;
   case 0x04000208:
@@ -233,7 +233,7 @@ void write_16(mem_t* mem, u32 addr, u16 val) {
     *(u16*)&mem->iWRAM[addr & IWRAM_DSIZE] = val;
     break;
   case 0x04000000 ... 0x04000058:
-    logdebug("[INFO][MEM] Write (%04X) to IO (%08X)\t[WARN] STUB!\n", val, addr);
+    logdebug("[INFO][MEM] Write (%04X) to IO (%08X)\n", val, addr);
     write16_io_ppu(&mem->ppu, addr, val);
     break;
   case 0x04000208:
@@ -272,7 +272,7 @@ void write_32(mem_t* mem, u32 addr, u32 val) {
     *(u32*)&mem->iWRAM[addr & IWRAM_DSIZE] = val;
     break;
   case 0x04000000 ... 0x04000058:
-    logdebug("[INFO][MEM] Write (%08X) to IO (%08X)\t[WARN] STUB!\n", val, addr);
+    logdebug("[INFO][MEM] Write (%08X) to IO (%08X)\n", val, addr);
     write32_io_ppu(&mem->ppu, addr, val);
     break;
   case 0x04000208:

@@ -1,34 +1,22 @@
-#include "arm/instruction/data_processing.h"
-#include "log.h"
+#include <arm/instruction/data_processing.h>
+#include <log.h>
+#include <helpers.h>
 
-u32 shift_data_processing(registers_t* regs) {
-  u32 result = 0;
+u32 arm_data_processing_shift(registers_t* regs, bool* carry_out) {
   if(bit(regs->instruction, 25)) {
-    result = ror32(regs->instruction & 0xff, bits(regs->instruction, 8, 11) * 2);
+    u32 input = regs->instruction & 0xff;
+    return ror32(input, bits(regs->instruction, 8, 11) * 2);
   } else {
-    result = regs->gpr[regs->instruction & 0xf];
-    u32 amount = bit(regs->instruction, 4) ? regs->gpr[bits(regs->instruction, 8, 11)] : bits(regs->instruction, 7, 11);
-    switch(bits(regs->instruction, 5, 6)) {
-      case 0b00:
-        regs->cpsr.carry = bit(regs->gpr[regs->instruction & 0xf], 32 - amount);
-        result = regs->gpr[regs->instruction & 0xf] << amount;
-        break;
-      case 0b01:
-        regs->cpsr.carry = bit(regs->gpr[regs->instruction & 0xf], amount - 1);
-        result = regs->gpr[regs->instruction & 0xf] >> amount;
-        break;
-      case 0b10:
-        regs->cpsr.carry = bit(regs->gpr[regs->instruction & 0xf], amount - 1);
-        result = (s32)(regs->gpr[regs->instruction & 0xf]) >> amount;
-        break;
-      case 0b11:
-        regs->cpsr.carry = bit(regs->gpr[regs->instruction & 0xf], amount - 1);
-        result = ror32(regs->gpr[regs->instruction & 0xf], amount);
-        break;
-    }
-  }
+    u32 input = regs->gpr[regs->instruction & 0xF];
+    u8 amount = 0;
+    u8 type = bits(regs->instruction, 5, 6);
 
-  return result;
+    amount = bit(regs->instruction, 4)
+             ? regs->gpr[bits(regs->instruction, 8, 11)] & 0xff
+             : bits(regs->instruction, 7, 11);
+
+    return shift_reg(type, input, amount, carry_out, regs);
+  }
 }
 
 arm_handler arm_handle_data_processing(u32 instruction) {
@@ -54,8 +42,9 @@ arm_handler arm_handle_data_processing(u32 instruction) {
 }
 
 ARM_INSTRUCTION(cmp) {
+  bool dummy = false;
   u8 rn = bits(registers->instruction, 16, 19);
-  u32 op1 = registers->gpr[rn], op2 = shift_data_processing(registers);
+  u32 op1 = registers->gpr[rn], op2 = arm_data_processing_shift(registers, &dummy);
   u32 result = op1 - op2;
   registers->cpsr.negative = result >> 31;
   registers->cpsr.carry = result <= op1;
@@ -65,10 +54,12 @@ ARM_INSTRUCTION(cmp) {
 
 ARM_INSTRUCTION(mov) {
   u8 rd = bits(registers->instruction, 12, 15);
-  logdebug("mov r%d, %08X\n", rd, shift_data_processing(registers));
-  registers->gpr[rd] = shift_data_processing(registers);
+  bool carry_out = false;
+  registers->gpr[rd] = arm_data_processing_shift(registers, &carry_out);
+  logdebug("mov r%d, %08X\n", rd, registers->gpr[rd]);
 
   if(bit(registers->instruction, 20)) {
+    registers->cpsr.carry = carry_out;
     registers->cpsr.negative = registers->gpr[rd] >> 31;
     registers->cpsr.zero = registers->gpr[rd] == 0;
     if(rd == 15) {
@@ -81,11 +72,12 @@ ARM_INSTRUCTION(mov) {
 ARM_INSTRUCTION(add) {
   u8 rd = bits(registers->instruction, 12, 15);
   u8 rn = bits(registers->instruction, 16, 19);
-  logdebug("add r%d, r%d, %08X\n", rd, rn, shift_data_processing(registers));
-  u32 op1 = shift_data_processing(registers);
+  bool dummy = false;
+  u32 op1 = arm_data_processing_shift(registers, &dummy);
   u32 op2 = registers->gpr[rn];
   u32 result = op1 + op2;
   registers->gpr[rd] = result;
+  logdebug("add r%d, r%d, %08X\n", rd, rn, op1);
 
   if(bit(registers->instruction, 20)) {
     registers->cpsr.negative = result >> 31;

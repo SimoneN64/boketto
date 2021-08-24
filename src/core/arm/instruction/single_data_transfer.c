@@ -1,35 +1,6 @@
-#include "arm/instruction/single_data_transfer.h"
-#include "log.h"
-
-u32 shift_single_data_transfer(registers_t* regs) {
-  u32 result = 0;
-  if(bit(regs->instruction, 25)) {
-    result = ror32(regs->instruction & 0xff, bits(regs->instruction, 8, 11) * 2);
-  } else {
-    result = regs->gpr[regs->instruction & 0xf];
-    u32 amount = bit(regs->instruction, 4) ? regs->gpr[bits(regs->instruction, 8, 11)] : bits(regs->instruction, 7, 11);
-    switch(bits(regs->instruction, 5, 6)) {
-      case 0b00:
-        regs->cpsr.carry = bit(regs->gpr[regs->instruction & 0xf], 32 - amount);
-        result = regs->gpr[regs->instruction & 0xf] << amount;
-        break;
-      case 0b01:
-        regs->cpsr.carry = bit(regs->gpr[regs->instruction & 0xf], amount - 1);
-        result = regs->gpr[regs->instruction & 0xf] >> amount;
-        break;
-      case 0b10:
-        regs->cpsr.carry = bit(regs->gpr[regs->instruction & 0xf], amount - 1);
-        result = (s32)(regs->gpr[regs->instruction & 0xf]) >> amount;
-        break;
-      case 0b11:
-        regs->cpsr.carry = bit(regs->gpr[regs->instruction & 0xf], amount - 1);
-        result = ror32(regs->gpr[regs->instruction & 0xf], amount);
-        break;
-    }
-  }
-
-  return result;
-}
+#include <arm/instruction/single_data_transfer.h>
+#include <log.h>
+#include <helpers.h>
 
 arm_handler arm_handle_single_data_transfer(u32 instruction) {
   if(bit(instruction, 26)) {
@@ -45,6 +16,16 @@ arm_handler arm_handle_single_data_transfer(u32 instruction) {
       return &arm_strh;
     }
   }
+}
+
+u32 arm_sdt_shift(registers_t* regs) {
+  u8 type = bits(regs->instruction, 5, 6);
+  u8 amount = bits(regs->instruction, 7, 11);
+  u32 input = regs->gpr[regs->instruction & 0xf];
+  bool carry_out = false;
+  u32 result = shift_imm(type, input, amount, &carry_out, regs);
+  regs->cpsr.carry = carry_out;
+  return result;
 }
 
 ARM_INSTRUCTION(strh) {
@@ -112,15 +93,15 @@ ARM_INSTRUCTION(ldrh) {
 ARM_INSTRUCTION(str) {
   u32 instr = registers->instruction;
   u32 address = registers->gpr[rn(instr)];
-  u32 offset = I(instr) ? shift_single_data_transfer(registers) : instr & 0xfff;
-
-  logdebug("str r%d, [r%d, %08X]\n", rd(instr), rn(instr), offset);
+  u32 offset = I(instr) ? arm_sdt_shift(registers) : instr & 0xfff;
 
   if(P(instr)) {
     address = U(instr) ? address + offset : address - offset;
   }
 
   address &= ~3;
+
+  logdebug("str r%d, [r%d, %08X]\n", rd(instr), rn(instr), address);
 
   if(B(instr)) {
     logfatal("strb!\n");
@@ -144,15 +125,15 @@ ARM_INSTRUCTION(str) {
 ARM_INSTRUCTION(ldr) {
   u32 instr = registers->instruction;
   u32 address = registers->gpr[rn(instr)];
-  u32 offset = I(instr) ? shift_single_data_transfer(registers) : instr & 0xfff;
-
-  logdebug("ldr r%d, [r%d, %08X]\n", rd(instr), rn(instr), offset);
+  u32 offset = I(instr) ? arm_sdt_shift(registers) : instr & 0xfff;
 
   if(P(instr)) {
     address = U(instr) ? address + offset : address - offset;
   }
 
   address &= ~3;
+
+  logdebug("ldr r%d, [r%d, %08X]\n", rd(instr), rn(instr), address);
 
   if(B(instr)) {
     logfatal("ldrb!\n");

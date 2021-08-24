@@ -13,7 +13,7 @@ THUMB_INSTRUCTION(ldr) {
   registers->gpr[rd] = read_32(mem, addr);
 }
 
-static inline const void print_list(u32 instruction) {
+static inline void print_list(u32 instruction) {
 #ifdef DEBUG
   u8 rn = (instruction >> 8) & 7;
   u8 list_mask = instruction & 0xff;
@@ -64,8 +64,8 @@ THUMB_INSTRUCTION(stmia) {
 }
 
 THUMB_INSTRUCTION(ldmia) {
-  u8 rn = (registers->instruction >> 8) & 7;
-  u32 base_address = registers->gpr[rn];
+  u8 rb = (registers->instruction >> 8) & 7;
+  u32 base_address = registers->gpr[rb];
 
   u8 list_mask = registers->instruction & 0xff;
   print_list(registers->instruction);
@@ -74,10 +74,10 @@ THUMB_INSTRUCTION(ldmia) {
 
   for(u8 i = 0; i < 8; i++) {
     if(bit(list_mask, i)) {
-      write_32(mem, base_address, registers->gpr[i]);
+      registers->gpr[i] = read_32(mem, base_address);
       base_address += 4;
     }
   }
 
-  registers->gpr[rn] = base_address;
+  registers->gpr[rb] = base_address;
 }
