@@ -19,9 +19,9 @@ THUMB_INSTRUCTION(stmia) {
   u32 base_address = registers->gpr[rn];
 
   u8 list_mask = registers->instruction & 0xff;
-  print_list(registers->instruction);
+  print_list(true, registers->instruction);
 
-  assert(list_mask);
+  assert(list_mask != 0);
 
   for(u8 i = 0; i < 8; i++) {
     if(bit(list_mask, i)) {
@@ -38,9 +38,9 @@ THUMB_INSTRUCTION(ldmia) {
   u32 base_address = registers->gpr[rb];
 
   u8 list_mask = registers->instruction & 0xff;
-  print_list(registers->instruction);
+  print_list(true, registers->instruction);
 
-  assert(list_mask);
+  assert(list_mask != 0);
 
   for(u8 i = 0; i < 8; i++) {
     if(bit(list_mask, i)) {

@@ -36,26 +36,64 @@ u32 arm_sdt_shift(registers_t* regs) {
 }
 
 ARM_INSTRUCTION(stm) {
-  u8 rn = (registers->instruction >> 8) & 7;
+  u8 rn = bits(registers->instruction, 16, 19);
   u32 base_address = registers->gpr[rn];
 
-  u8 list_mask = registers->instruction & 0xff;
-  print_list(registers->instruction);
+  u16 list_mask = registers->instruction & 0xffff;
+  print_list(false, registers->instruction);
+  bool increment = bit(registers->instruction, 23);
+  bool before = bit(registers->instruction, 24);
 
-  assert(list_mask);
+  assert(list_mask != 0);
 
-  for(u8 i = 0; i < 8; i++) {
+  u8 count_regs = 0;
+  for(u8 i = 0; i < 15; i++) {
     if(bit(list_mask, i)) {
+      if(before) {
+        base_address += increment ? 4 : -4;
+      }
       write_32(mem, base_address, registers->gpr[i]);
-      base_address += 4;
+      if(!before) {
+        base_address += increment ? 4 : -4;
+      }
+
+      count_regs++;
     }
   }
 
-  registers->gpr[rn] = base_address;
+  if(W(registers->instruction)) {
+    registers->gpr[rn] += U(registers->instruction) ? (count_regs * 4) : -(count_regs * 4);
+  }
 }
 
 ARM_INSTRUCTION(ldm) {
+  u8 rn = bits(registers->instruction, 16, 19);
+  u32 base_address = registers->gpr[rn];
 
+  u16 list_mask = registers->instruction & 0xffff;
+  print_list(false, registers->instruction);
+  bool increment = bit(registers->instruction, 23);
+  bool before = bit(registers->instruction, 24);
+
+  assert(list_mask != 0);
+
+  u8 count_regs = 0;
+  for(u8 i = 0; i < 15; i++) {
+    if(bit(list_mask, i)) {
+      if(before) {
+        base_address += increment ? 4 : -4;
+      }
+      registers->gpr[i] = read_32(mem, base_address);
+      if(!before) {
+        base_address += increment ? 4 : -4;
+      }
+      count_regs++;
+    }
+  }
+
+  if(W(registers->instruction)) {
+    registers->gpr[rn] += U(registers->instruction) ? (count_regs * 4) : -(count_regs * 4);
+  }
 }
 
 ARM_INSTRUCTION(strh) {
@@ -161,13 +199,16 @@ ARM_INSTRUCTION(ldr) {
     address = U(instr) ? address + offset : address - offset;
   }
 
-  address &= ~3;
-
-  logdebug("ldr r%d, [r%d, %08X]\n", rd(instr), rn(instr), address);
-
   if(B(instr)) {
-    logfatal("ldrb!\n");
+    logdebug("ldrb r%d, [r%d, %08X]\n", rd(instr), rn(instr), address);
+    if(rd(instr) != 15) {
+      registers->gpr[rd(instr)] = read_8(mem, address);
+    } else {
+      flush_pipe_32(registers, mem);
+    }
   } else {
+    address &= ~3;
+    logdebug("ldr r%d, [r%d, %08X]\n", rd(instr), rn(instr), address);
     if(rd(instr) != 15) {
       registers->gpr[rd(instr)] = read_32(mem, address);
     } else {

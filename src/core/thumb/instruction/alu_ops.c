@@ -25,7 +25,7 @@ THUMB_INSTRUCTION(sub_reg) {
 }
 
 THUMB_INSTRUCTION(sub_imm) {
-  u8 rd = bits(registers->instruction, 8, 11);
+  u8 rd = bits(registers->instruction, 8, 10);
   u32 op1 = registers->gpr[rd];
   u8 op2 = registers->instruction & 0xff;
   u32 result = op1 - op2;

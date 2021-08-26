@@ -66,7 +66,7 @@ ARM_INSTRUCTION(mov) {
     registers->cpsr.carry = carry_out;
     registers->cpsr.negative = registers->gpr[rd] >> 31;
     registers->cpsr.zero = registers->gpr[rd] == 0;
-    if(rd == 15) {
+    if(rd == PC) {
       registers->cpsr.raw = registers->spsr.raw;
       flush_pipe_32(registers, mem);
     }
