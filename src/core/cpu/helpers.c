@@ -22,14 +22,14 @@ bool get_condition(psr_t psr, u8 cond) {
   }
 }
 
-void set_pc(bool link, mem_t* mem, registers_t* registers, u32 value) {
+void set_pc(bool link, mem_t* mem, registers_t* registers, u32 value, bool cond) {
   if(link) {
     registers->gpr[LR] = registers->gpr[PC] - (registers->cpsr.thumb ? 1 : 4);
   }
 
   registers->gpr[PC] = value;
 
-  if(registers->cpsr.thumb) {
+  if(cond) {
     registers->gpr[PC] &= ~1;
     flush_pipe_16(registers, mem);
   } else {

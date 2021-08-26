@@ -8,7 +8,7 @@ THUMB_INSTRUCTION(bcond) {
   logdebug("b %08X\n", addr);
   if(get_condition(registers->cpsr, cond)) {
     logdebug("Condition passed!\n");
-    set_pc(false, mem, registers, registers->gpr[PC] + addr);
+    set_pc(false, mem, registers, registers->gpr[PC] + addr, registers->cpsr.thumb);
   } else {
     logdebug("Condition not passed!\n");
   }
@@ -16,15 +16,9 @@ THUMB_INSTRUCTION(bcond) {
 
 THUMB_INSTRUCTION(bx) {
   u8 rm = (registers->instruction >> 3) & 0xf;
-  bool thumb = registers->cpsr.thumb = registers->gpr[rm] & 1;
-  u32 addr;
-  if(thumb) {
-    addr = registers->gpr[rm] & ~1;
-  } else {
-    addr = registers->gpr[rm] & ~3;
-  }
+  registers->cpsr.thumb = registers->gpr[rm] & 1;
   logdebug("bx r%d\n", rm);
-  set_pc(false, mem, registers, addr);
+  set_pc(false, mem, registers, registers->gpr[rm], registers->cpsr.thumb);
 }
 
 THUMB_INSTRUCTION(bl_high) {
@@ -37,7 +31,7 @@ THUMB_INSTRUCTION(bl_low) {
   s16 offset = registers->instruction & 0x7FF;
   logdebug("bl[h == 0b11] %08X\n", offset);
   u32 pc = registers->gpr[PC];
-  set_pc(false, mem, registers, registers->gpr[LR] + (offset << 1));
+  set_pc(false, mem, registers, registers->gpr[LR] + (offset << 1), registers->cpsr.thumb);
   registers->gpr[LR] = (pc - 2) | 1;
 }
 

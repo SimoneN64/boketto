@@ -47,8 +47,10 @@ arm_handler arm_handle_data_processing(u32 instruction) {
 
 ARM_INSTRUCTION(cmp) {
   bool dummy = false;
+  bool I = bit(registers->instruction, 25);
   u8 rn = bits(registers->instruction, 16, 19);
   u32 op1 = registers->gpr[rn], op2 = arm_data_processing_shift(registers, &dummy);
+  logdebug(I ? "cmp r%d, %08X\n" : "cmp r%d, r%d\n", rn, I ? op2 : registers->instruction & 0xf);
   u32 result = op1 - op2;
   registers->cpsr.negative = result >> 31;
   registers->cpsr.carry = result <= op1;
@@ -58,17 +60,21 @@ ARM_INSTRUCTION(cmp) {
 
 ARM_INSTRUCTION(mov) {
   u8 rd = bits(registers->instruction, 12, 15);
+  bool I = bit(registers->instruction, 25);
   bool carry_out = registers->cpsr.carry;
-  registers->gpr[rd] = arm_data_processing_shift(registers, &carry_out);
-  logdebug("mov r%d, %08X\n", rd, registers->gpr[rd]);
+  u32 result = arm_data_processing_shift(registers, &carry_out);
+  registers->gpr[rd] = result;
+  logdebug(I ? "mov r%d, %08X\n" : "mov r%d, r%d\n", rd, I ? registers->gpr[rd] : registers->instruction & 0xf);
 
   if(bit(registers->instruction, 20)) {
-    registers->cpsr.carry = carry_out;
-    registers->cpsr.negative = registers->gpr[rd] >> 31;
-    registers->cpsr.zero = registers->gpr[rd] == 0;
     if(rd == PC) {
       registers->cpsr.raw = registers->spsr.raw;
-      flush_pipe_32(registers, mem);
+      change_mode(registers, registers->cpsr.mode);
+      set_pc(false, mem, registers, result, registers->gpr[PC] & 1);
+    } else {
+      registers->cpsr.carry = carry_out;
+      registers->cpsr.negative = registers->gpr[rd] >> 31;
+      registers->cpsr.zero = registers->gpr[rd] == 0;
     }
   }
 }
@@ -77,30 +83,34 @@ ARM_INSTRUCTION(add) {
   u8 rd = bits(registers->instruction, 12, 15);
   u8 rn = bits(registers->instruction, 16, 19);
   bool dummy = false;
+  bool I = bit(registers->instruction, 25);
   u32 op1 = arm_data_processing_shift(registers, &dummy);
   u32 op2 = registers->gpr[rn];
   u32 result = op1 + op2;
   registers->gpr[rd] = result;
-  logdebug("add r%d, r%d, %08X\n", rd, rn, op1);
+  logdebug(I ? "add r%d, r%d, %08X\n" : "add r%d, r%d, r%d\n", rd, rn, I ? op1 : registers->instruction & 0xf);
 
   if(bit(registers->instruction, 20)) {
-    registers->cpsr.negative = result >> 31;
-    registers->cpsr.zero = result == 0;
-    registers->cpsr.overflow = ((op1 ^ result) & (op2 ^ result)) >> 31;
-    registers->cpsr.carry = (UINT32_MAX - op1) < op2;
     if(rd == PC) {
       registers->cpsr.raw = registers->spsr.raw;
-      flush_pipe_32(registers, mem);
+      change_mode(registers, registers->cpsr.mode);
+      set_pc(false, mem, registers, result, registers->gpr[PC] & 1);
+    } else {
+      registers->cpsr.negative = result >> 31;
+      registers->cpsr.zero = result == 0;
+      registers->cpsr.overflow = ((op1 ^ result) & (op2 ^ result)) >> 31;
+      registers->cpsr.carry = (UINT32_MAX - op1) < op2;
     }
   }
 }
 
 ARM_INSTRUCTION(tst) {
   bool carry_out = registers->cpsr.carry;
+  bool I = bit(registers->instruction, 25);
   u8 rn = bits(registers->instruction, 16, 19);
   u32 op1 = registers->gpr[rn];
   u32 op2 = arm_data_processing_shift(registers, &carry_out);
-  logdebug("tst r%d, %08X\n", rn, op2);
+  logdebug(I ? "tst r%d, %08X\n" : "tst r%d, r%d\n", rn, I ? op2 : registers->instruction & 0xf);
   u32 res = op1 & op2;
   registers->cpsr.negative = res >> 31;
   registers->cpsr.zero = res == 0;
