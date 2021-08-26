@@ -5,7 +5,11 @@
 u32 arm_data_processing_shift(registers_t* regs, bool* carry_out) {
   if(bit(regs->instruction, 25)) {
     u32 input = regs->instruction & 0xff;
-    return ror32(input, bits(regs->instruction, 8, 11) * 2);
+    u8 amount = bits(regs->instruction, 8, 11) * 2;
+    if(amount != 0) {
+      *carry_out = (input >> (amount - 1)) & 1;
+    }
+    return ror32(input, amount);
   } else {
     u32 input = regs->gpr[regs->instruction & 0xF];
     u8 amount = 0;
@@ -29,7 +33,7 @@ arm_handler arm_handle_data_processing(u32 instruction) {
     case 0b0101: return &arm_unimplemented_data_processing;
     case 0b0110: return &arm_unimplemented_data_processing;
     case 0b0111: return &arm_unimplemented_data_processing;
-    case 0b1000: return &arm_unimplemented_data_processing;
+    case 0b1000: return &arm_tst;
     case 0b1001: return &arm_unimplemented_data_processing;
     case 0b1010: return &arm_cmp;
     case 0b1011: return &arm_unimplemented_data_processing;
@@ -54,7 +58,7 @@ ARM_INSTRUCTION(cmp) {
 
 ARM_INSTRUCTION(mov) {
   u8 rd = bits(registers->instruction, 12, 15);
-  bool carry_out = false;
+  bool carry_out = registers->cpsr.carry;
   registers->gpr[rd] = arm_data_processing_shift(registers, &carry_out);
   logdebug("mov r%d, %08X\n", rd, registers->gpr[rd]);
 
@@ -89,6 +93,18 @@ ARM_INSTRUCTION(add) {
       flush_pipe_32(registers, mem);
     }
   }
+}
+
+ARM_INSTRUCTION(tst) {
+  bool carry_out = registers->cpsr.carry;
+  u8 rn = bits(registers->instruction, 16, 19);
+  u32 op1 = registers->gpr[rn];
+  u32 op2 = arm_data_processing_shift(registers, &carry_out);
+  logdebug("tst r%d, %08X\n", rn, op2);
+  u32 res = op1 & op2;
+  registers->cpsr.negative = res >> 31;
+  registers->cpsr.zero = res == 0;
+  registers->cpsr.carry = carry_out;
 }
 
 ARM_INSTRUCTION(undefined_data_processing) {

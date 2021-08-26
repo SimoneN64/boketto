@@ -174,7 +174,7 @@ u32 read_32(mem_t* mem, u32 addr) {
     logdebug("[INFO][MEM] Read (%08X) from ROM (%08X)\n", val, addr);
     break;
   default:
-    logfatal("[ERR ][MEM] Read on unhandled address! (addr: %08X)\n", addr);
+    logfatal("[WARN][MEM] Read on unhandled address! (addr: %08X)\n", addr);
   }
 
   return val;
@@ -292,6 +292,6 @@ void write_32(mem_t* mem, u32 addr, u32 val) {
     *(u32*)&mem->ppu.oam[addr & OAM_DSIZE] = val;
     break;
   default:
-    logfatal("[ERR ][MEM] Write to unhandled address! (addr: %08X, val: %08X)\n", addr, val);
+    logfatal("[WARN][MEM] Write to unhandled address! (addr: %08X, val: %08X)\n", addr, val);
   }
 }

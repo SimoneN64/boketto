@@ -1,4 +1,4 @@
-#include <arm/instruction/single_data_transfer.h>
+#include <arm/instruction/load_store.h>
 #include <log.h>
 #include <helpers.h>
 
@@ -18,14 +18,44 @@ arm_handler arm_handle_single_data_transfer(u32 instruction) {
   }
 }
 
+arm_handler arm_handle_load_store_multiple(u32 instruction) {
+  if(bit(instruction, 20)) {
+    return &arm_ldm;
+  } else {
+    return &arm_stm;
+  }
+}
+
 u32 arm_sdt_shift(registers_t* regs) {
   u8 type = bits(regs->instruction, 5, 6);
   u8 amount = bits(regs->instruction, 7, 11);
   u32 input = regs->gpr[regs->instruction & 0xf];
-  bool carry_out = false;
+  bool carry_out = regs->cpsr.carry;
   u32 result = shift_imm(type, input, amount, &carry_out, regs);
-  regs->cpsr.carry = carry_out;
   return result;
+}
+
+ARM_INSTRUCTION(stm) {
+  u8 rn = (registers->instruction >> 8) & 7;
+  u32 base_address = registers->gpr[rn];
+
+  u8 list_mask = registers->instruction & 0xff;
+  print_list(registers->instruction);
+
+  assert(list_mask);
+
+  for(u8 i = 0; i < 8; i++) {
+    if(bit(list_mask, i)) {
+      write_32(mem, base_address, registers->gpr[i]);
+      base_address += 4;
+    }
+  }
+
+  registers->gpr[rn] = base_address;
+}
+
+ARM_INSTRUCTION(ldm) {
+
 }
 
 ARM_INSTRUCTION(strh) {

@@ -12,10 +12,13 @@
 #define rm(x) ((x) & 0xf)
 
 arm_handler arm_handle_single_data_transfer(u32 instruction);
+arm_handler arm_handle_load_store_multiple(u32 instruction);
 u32 arm_sdt_shift(registers_t* regs);
 
 ARM_INSTRUCTION(str);
 ARM_INSTRUCTION(ldr);
+ARM_INSTRUCTION(stm);
+ARM_INSTRUCTION(ldm);
 ARM_INSTRUCTION(strh);
 ARM_INSTRUCTION(ldrh);
 ARM_INSTRUCTION(undefined_single_data_transfer);

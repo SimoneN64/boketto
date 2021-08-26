@@ -13,10 +13,6 @@ add_subdirectory(include/external/nativefiledialog-extended/)
 
 file(GLOB_RECURSE EMU_SRC "src/*.c")
 
-if(APPLE)
-  include_directories(${SDL2_INCLUDE_DIRS})
-endif()
-
 include_directories(
   ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/include/util/
@@ -26,13 +22,14 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/include/core/scheduler/
   ${CMAKE_SOURCE_DIR}/include/external/
   ${CMAKE_SOURCE_DIR}/include/external/nativefiledialog-extended/
+  ${SDL2_INCLUDE_DIRS}
 )
 
 if(WIN32)
   set(FLAGS -static SDL2main SDL2 gcc stdc++ winpthread winmm version Imm32 Setupapi)
 elseif(UNIX)
   set(FLAGS SDL2)
-else()
+elseif(APPLE)
   set(FLAGS ${SDL2_LIBRARIES})
 endif()
 

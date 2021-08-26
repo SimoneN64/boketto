@@ -4,7 +4,7 @@ void generate_thumb_lut(thumb_handler thumb_lut[1024]) {
   for(u16 i = 0; i < 1024; i++) {
     u16 mask = i << 6;
     if((mask & 0xF800) == 0) {
-      thumb_lut[i] = &thumb_lsl;
+      thumb_lut[i] = &thumb_lsl_imm;
     } else if((mask & 0xF000) == 0xD000) {
       thumb_lut[i] = &thumb_bcond;
     } else if((mask & 0xFF80) == 0x4700) {

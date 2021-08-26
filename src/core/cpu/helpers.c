@@ -65,8 +65,7 @@ SHIFT(LSR_IMM) {
     output = input >> amount;
     *carry_out = input & (1 << (amount - 1));
   } else if (amount == 32) {
-    output = 0;
-    *carry_out = input & (1 << 31);
+    logfatal("How did you even get an amount of 32 in LSR_IMM?!\n");
   } else {
     output = 0;
     *carry_out = false;
