@@ -1,5 +1,5 @@
-#include "thumb/instruction/alu_ops.h"
-#include "log.h"
+#include <thumb/instruction/alu_ops.h>
+#include <log.h>
 
 THUMB_INSTRUCTION(bic) {
   u8 rd = registers->instruction & 7;

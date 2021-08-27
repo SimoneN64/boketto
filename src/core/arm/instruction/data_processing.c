@@ -63,18 +63,20 @@ ARM_INSTRUCTION(mov) {
   bool I = bit(registers->instruction, 25);
   bool carry_out = registers->cpsr.carry;
   u32 result = arm_data_processing_shift(registers, &carry_out);
-  registers->gpr[rd] = result;
-  logdebug(I ? "mov r%d, %08X\n" : "mov r%d, r%d\n", rd, I ? registers->gpr[rd] : registers->instruction & 0xf);
+  logdebug(I ? "mov r%d, %08X\n" : "mov r%d, r%d\n", rd, I ? result : registers->instruction & 0xf);
 
-  if(bit(registers->instruction, 20)) {
-    if(rd == PC) {
+  if(rd == PC) {
+    if(bit(registers->instruction, 20)) {
       registers->cpsr.raw = registers->spsr.raw;
       change_mode(registers, registers->cpsr.mode);
-      set_pc(false, mem, registers, result, registers->gpr[PC] & 1);
-    } else {
+    }
+    set_pc(false, mem, registers, result, registers->cpsr.thumb);
+  } else {
+    registers->gpr[rd] = result;
+    if(bit(registers->instruction, 20)) {
+      registers->cpsr.negative = result >> 31;
+      registers->cpsr.zero = result == 0;
       registers->cpsr.carry = carry_out;
-      registers->cpsr.negative = registers->gpr[rd] >> 31;
-      registers->cpsr.zero = registers->gpr[rd] == 0;
     }
   }
 }
@@ -87,15 +89,17 @@ ARM_INSTRUCTION(add) {
   u32 op1 = arm_data_processing_shift(registers, &dummy);
   u32 op2 = registers->gpr[rn];
   u32 result = op1 + op2;
-  registers->gpr[rd] = result;
   logdebug(I ? "add r%d, r%d, %08X\n" : "add r%d, r%d, r%d\n", rd, rn, I ? op1 : registers->instruction & 0xf);
 
-  if(bit(registers->instruction, 20)) {
-    if(rd == PC) {
+  if(rd == PC) {
+    if(bit(registers->instruction, 20)) {
       registers->cpsr.raw = registers->spsr.raw;
       change_mode(registers, registers->cpsr.mode);
-      set_pc(false, mem, registers, result, registers->gpr[PC] & 1);
-    } else {
+    }
+    set_pc(false, mem, registers, result, registers->cpsr.thumb);
+  } else {
+    registers->gpr[rd] = result;
+    if(bit(registers->instruction, 20)) {
       registers->cpsr.negative = result >> 31;
       registers->cpsr.zero = result == 0;
       registers->cpsr.overflow = ((op1 ^ result) & (op2 ^ result)) >> 31;

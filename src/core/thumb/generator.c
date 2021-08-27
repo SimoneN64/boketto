@@ -1,4 +1,4 @@
-#include "thumb/generator.h"
+#include <thumb/generator.h>
 
 void generate_thumb_lut(thumb_handler thumb_lut[1024]) {
   for(u16 i = 0; i < 1024; i++) {
@@ -24,11 +24,17 @@ void generate_thumb_lut(thumb_handler thumb_lut[1024]) {
     } else if((mask & 0xF800) == 0x3800) {
       thumb_lut[i] = &thumb_sub_imm;
     } else if((mask & 0xF800) == 0x4800) {
-      thumb_lut[i] = &thumb_ldr;
+      thumb_lut[i] = &thumb_ldr_pc;
+    } else if((mask & 0xF800) == 0x6800) {
+      thumb_lut[i] = &thumb_ldr_reg;
+    } else if((mask & 0xF800) == 0x6000) {
+      thumb_lut[i] = &thumb_str_reg;
     } else if((mask & 0xF800) == 0xC800) {
       thumb_lut[i] = &thumb_ldmia;
     } else if((mask & 0xF800) == 0xC000) {
       thumb_lut[i] = &thumb_stmia;
+    } else if((mask & 0xFE00) == 0xB400) {
+      thumb_lut[i] = &thumb_push;
     } else {
       thumb_lut[i] = &thumb_undefined;
     }

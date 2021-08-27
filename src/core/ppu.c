@@ -200,10 +200,10 @@ void mode4(ppu_t* ppu) {
   u32 vramIndex = ppu->io.vcount * GBA_W;
   u32 bufferIndex = vramIndex * DEPTH;
   for(int x = 0; x < GBA_W; x++) {
-    const u32 paletteIndex = ppu->vram[vramIndex] * DEPTH;
-    ppu->framebuffer[bufferIndex >> 1] = *(u16*)&ppu->vram[paletteIndex];
+    const u32 paletteIndex = ppu->vram[vramIndex] * 2;
+    ppu->framebuffer[bufferIndex] = *(u16*)&ppu->pram[paletteIndex];
 
     ++vramIndex;
-    bufferIndex += DEPTH;
+    ++bufferIndex;
   }
 }

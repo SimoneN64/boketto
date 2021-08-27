@@ -1,5 +1,5 @@
-#include "thumb/instructions.h"
-#include "log.h"
+#include <thumb/instructions.h>
+#include <log.h>
 
 THUMB_INSTRUCTION(undefined) {
   logfatal("Undefined thumb instruction: (%04X) (%s)\n", registers->instruction, binary_str(registers->instruction, 16));

@@ -53,7 +53,7 @@ static inline void print_list(bool thumb, u32 instruction) {
     }
 
     if(bit(list_mask, i)) {
-      logdebug(!is_end ? "%s, " : "%s", reg_str[i]);
+      logdebug(is_end ? "%s" : "%s, ", reg_str[i]);
     }
   }
 
