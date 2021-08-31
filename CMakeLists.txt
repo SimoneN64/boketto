@@ -17,7 +17,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/include/util/
   ${CMAKE_SOURCE_DIR}/include/core/
-  ${CMAKE_SOURCE_DIR}/include/core/ppu/
+  ${CMAKE_SOURCE_DIR}/include/core/io/
   ${CMAKE_SOURCE_DIR}/include/core/cpu/
   ${CMAKE_SOURCE_DIR}/include/core/scheduler/
   ${CMAKE_SOURCE_DIR}/include/external/

@@ -31,264 +31,248 @@ void load_rom(mem_t* mem, const char* path) {
   fclose(fp);
 }
 
-u8 read_8(mem_t* mem, u32 addr) {
-  u8 val = 0xff;
+static const char* region_str[14] = {
+  [0] = "BIOS", [2] = "eWRAM", "iWRAM", "IO",
+  "PRAM", "VRAM", "OAM", "ROM", "ROM", "ROM", "ROM", "ROM", "ROM"
+};
+
+u8 read_8(mem_t* mem, u32 pc, u32 addr) {
+  u8 val;
+
   switch(addr) {
   case 0x00000000 ... 0x00003FFF:
     val = mem->bios[addr];
-    logdebug("[INFO][MEM] Read (%02X) from BIOS (%08X)\n", val, addr);
     break;
   case 0x00004000 ... 0x01FFFFFF:
-    logdebug("[WARN][MEM] Open bus read! (%08X)(0xFF)\n", addr);
+    logdebug("[INFO][MEM] Read from Open Bus (STUB!) (%08X)\n", addr);
     return 0xff;
   case 0x02000000 ... 0x02FFFFFF:
     val = mem->eWRAM[addr & EWRAM_DSIZE];
-    logdebug("[INFO][MEM] Read (%02X) from eWRAM (%08X)\n", val, addr);
     break;
   case 0x03000000 ... 0x03FFFFFF:
     val = mem->iWRAM[addr & IWRAM_DSIZE];
-    logdebug("[INFO][MEM] Read (%02X) from iWRAM (%08X)\n", val, addr);
     break;
   case 0x04000000 ... 0x04000058:
-    val = read8_io_ppu(&mem->ppu, addr);
-    logdebug("[INFO][MEM] Read (%02X) from IO (%08X)\n", val, addr);
+    val = read8_io_ppu(&mem->ppu.io, addr);
+    break;
+  case 0x040000B0 ... 0x040000DF:
+    val = read8_io_dma(mem, addr);
     break;
   case 0x04000208:
     val = mem->ime;
-    logdebug("[INFO][MEM] Read (%02X) from IME (%08X) [WARN][STUB!]\n", val, addr);
     break;
   case 0x05000000 ... 0x05FFFFFF:
     val = mem->ppu.pram[addr & PRAM_DSIZE];
-    logdebug("[INFO][MEM] Read (%02X) from PRAM (%08X)\n", val, addr);
     break;
   case 0x06000000 ... 0x06FFFFFF:
     val = mem->ppu.vram[addr & VRAM_DSIZE];
-    logdebug("[INFO][MEM] Read (%02X) from VRAM (%08X)\n", val, addr);
     break;
   case 0x07000000 ... 0x07FFFFFF:
     val = mem->ppu.oam[addr & OAM_DSIZE];
-    logdebug("[INFO][MEM] Read (%02X) from OAM (%08X)\n", val, addr);
     break;
   case 0x08000000 ... 0x0DFFFFFF:
     val = mem->rom[addr & (mem->rom_size - 1)];
-    logdebug("[INFO][MEM] Read (%02X) from ROM (%08X)\n", val, addr);
     break;
   default:
-    logfatal("[ERR ][MEM] Read on unhandled address! (%08X)\n", addr);
+    logfatal("[ERR ][MEM] Read from unhandled %s! (%08X) (PC: %08X)\n", region_str[addr >> 24], addr, pc);
   }
 
+  logdebug("[INFO][MEM] Read from %s (%08X)\n", region_str[addr >> 24], addr);
   return val;
 }
 
-u16 read_16(mem_t* mem, u32 addr) {
-  u16 val = 0xffff;
+u16 read_16(mem_t* mem, u32 pc, u32 addr) {
+  u16 val;
   assert((addr & 1) == 0);
+
   switch(addr) {
   case 0x00000000 ... 0x00003FFF:
     val = *(u16*)&mem->bios[addr];
-    logdebug("[INFO][MEM] Read (%04X) from BIOS (%08X)\n", val, addr);
     break;
   case 0x00004000 ... 0x01FFFFFF:
-    logdebug("[WARN][MEM] Open bus read! (%08X)(0xFFFF)\n", addr);
+    logdebug("[INFO][MEM] Read from Open Bus (STUB!) (%08X)\n", addr);
     return 0xffff;
   case 0x02000000 ... 0x02FFFFFF:
     val = *(u16*)&mem->eWRAM[addr & EWRAM_DSIZE];
-    logdebug("[INFO][MEM] Read (%04X) from eWRAM (%08X)\n", val, addr);
     break;
   case 0x03000000 ... 0x03FFFFFF:
     val = *(u16*)&mem->iWRAM[addr & IWRAM_DSIZE];
-    logdebug("[INFO][MEM] Read (%04X) from iWRAM (%08X)\n", val, addr);
     break;
   case 0x04000000 ... 0x04000058:
-    val = read16_io_ppu(&mem->ppu, addr);
-    logdebug("[INFO][MEM] Read (%04X) from IO (%08X)\n", val, addr);
+    val = read16_io_ppu(&mem->ppu.io, addr);
+    break;
+  case 0x040000B0 ... 0x040000DF:
+    val = read16_io_dma(mem, addr);
     break;
   case 0x04000208:
     val = mem->ime;
-    logdebug("[INFO][MEM] Read (%02X) from IME (%08X) [WARN][STUB!]\n", val, addr);
     break;
   case 0x05000000 ... 0x05FFFFFF:
     val = *(u16*)&mem->ppu.pram[addr & PRAM_DSIZE];
-    logdebug("[INFO][MEM] Read (%04X) from PRAM (%08X)\n", val, addr);
     break;
   case 0x06000000 ... 0x06FFFFFF:
     val = *(u16*)&mem->ppu.vram[addr & VRAM_DSIZE];
-    logdebug("[INFO][MEM] Read (%04X) from VRAM (%08X)\n", val, addr);
     break;
   case 0x07000000 ... 0x07FFFFFF:
     val = *(u16*)&mem->ppu.oam[addr & OAM_DSIZE];
-    logdebug("[INFO][MEM] Read (%04X) from OAM (%08X)\n", val, addr);
     break;
   case 0x08000000 ... 0x0DFFFFFF:
     val = *(u16*)&mem->rom[addr & (mem->rom_size - 1)];
-    logdebug("[INFO][MEM] Read (%04X) from ROM (%08X)\n", val, addr);
     break;
   default:
-    logfatal("[ERR ][MEM] Read on unhandled address! (addr: %08X)\n", addr);
+    logfatal("[ERR ][MEM] Read from unhandled %s! (%08X) (PC: %08X)\n", region_str[addr >> 24], addr, pc);
   }
 
+  logdebug("[INFO][MEM] Read from %s (%08X)\n", region_str[addr >> 24], addr);
   return val;
 }
 
-u32 read_32(mem_t* mem, u32 addr) {
-  u32 val = 0xffffffff;
+u32 read_32(mem_t* mem, u32 pc, u32 addr) {
+  u32 val;
   assert((addr & 3) == 0);
+
   switch(addr) {
   case 0x00000000 ... 0x00003FFF:
     val = *(u32*)&mem->bios[addr];
-    logdebug("[INFO][MEM] Read (%08X) from BIOS (%08X)\n", val, addr);
     break;
   case 0x00004000 ... 0x01FFFFFF:
-    logdebug("[WARN][MEM] Open bus read! (%08X)(0xFFFFFFFF)\n", addr);
-    return 0xff;
+    logdebug("[INFO][MEM] Read from Open Bus (STUB!) (%08X)\n", addr);
+    return 0xffffffff;
   case 0x02000000 ... 0x02FFFFFF:
     val = *(u32*)&mem->eWRAM[addr & EWRAM_DSIZE];
-    logdebug("[INFO][MEM] Read (%08X) from eWRAM (%08X)\n", val, addr);
     break;
   case 0x03000000 ... 0x03FFFFFF:
     val = *(u32*)&mem->iWRAM[addr & IWRAM_DSIZE];
-    logdebug("[INFO][MEM] Read (%08X) from iWRAM (%08X)\n", val, addr);
     break;
   case 0x04000000 ... 0x04000058:
-    val = read32_io_ppu(&mem->ppu, addr);
-    logdebug("[INFO][MEM] Read (%08X) from IO (%08X)\n", val, addr);
+    val = read32_io_ppu(&mem->ppu.io, addr);
+    break;
+  case 0x040000B0 ... 0x040000DF:
+    val = read32_io_dma(mem, addr);
     break;
   case 0x04000208:
     val = mem->ime;
-    logdebug("[INFO][MEM] Read (%02X) from IME (%08X) [WARN][STUB!]\n", val, addr);
     break;
   case 0x05000000 ... 0x05FFFFFF:
     val = *(u32*)&mem->ppu.pram[addr & PRAM_DSIZE];
-    logdebug("[INFO][MEM] Read (%08X) from PRAM (%08X)\n", val, addr);
     break;
   case 0x06000000 ... 0x06FFFFFF:
     val = *(u32*)&mem->ppu.vram[addr & VRAM_DSIZE];
-    logdebug("[INFO][MEM] Read (%08X) from VRAM (%08X)\n", val, addr);
     break;
   case 0x07000000 ... 0x07FFFFFF:
     val = *(u32*)&mem->ppu.oam[addr & OAM_DSIZE];
-    logdebug("[INFO][MEM] Read (%08X) from OAM (%08X)\n", val, addr);
     break;
   case 0x08000000 ... 0x0DFFFFFF:
     val = *(u32*)&mem->rom[addr & (mem->rom_size - 1)];
-    logdebug("[INFO][MEM] Read (%08X) from ROM (%08X)\n", val, addr);
     break;
   default:
-    logfatal("[WARN][MEM] Read on unhandled address! (addr: %08X)\n", addr);
+    logfatal("[WARN][MEM] Read from unhandled %s! (%08X) (PC: %08X)\n", region_str[addr >> 24], addr, pc);
   }
 
+  logdebug("[INFO][MEM] Read from %s (%08X)\n", region_str[addr >> 24], addr);
   return val;
 }
 
-void write_8(mem_t* mem, u32 addr, u8 val) {
+void write_8(mem_t* mem, u32 pc, u32 addr, u8 val) {
   switch(addr) {
   case 0x02000000 ... 0x02FFFFFF:
-    logdebug("[INFO][MEM] Write (%02X) to eWRAM (%08X)\n", val, addr);
     mem->eWRAM[addr & EWRAM_DSIZE] = val;
     break;
   case 0x03000000 ... 0x03FFFFFF:
-    logdebug("[INFO][MEM] Write (%02X) to iWRAM (%08X)\n", val, addr);
     mem->iWRAM[addr & IWRAM_DSIZE] = val;
     break;
   case 0x04000000 ... 0x04000058:
-    logdebug("[INFO][MEM] Write (%02X) to IO (%08X)\n", val, addr);
-    write8_io_ppu(&mem->ppu, addr, val);
+    write8_io_ppu(&mem->ppu.io, addr, val);
+    break;
+  case 0x040000B0 ... 0x040000DF:
+    write8_io_dma(mem, addr, val);
     break;
   case 0x04000208:
-    logdebug("[INFO][MEM] Write (%02X) to IME (%08X) [WARN][STUB!]\n", val, addr);
     mem->ime = val;
     break;
   case 0x05000000 ... 0x05FFFFFF:
-    logdebug("[INFO][MEM] Write (%02X) to PRAM (%08X)\n", val, addr);
     mem->ppu.pram[addr & PRAM_DSIZE] = val;
     break;
   case 0x06000000 ... 0x06FFFFFF:
-    logdebug("[INFO][MEM] Write (%02X) to VRAM (%08X)\n", val, addr);
     mem->ppu.vram[addr & VRAM_DSIZE] = val;
     break;
   case 0x07000000 ... 0x07FFFFFF:
-    logdebug("[INFO][MEM] Write (%02X) to OAM (%08X)\n", val, addr);
     mem->ppu.oam[addr & OAM_DSIZE] = val;
     break;
   default:
-    logfatal("[ERR ][MEM] Write to unhandled address! (addr: %08X, val: %02X)\n", addr, val);
+    logfatal("[ERR ][MEM] Write (%02X) to unhandled %s (%08X) (PC: %08X)!\n", val, region_str[addr >> 24], addr, pc);
   }
+  logdebug("[INFO][MEM] Write (%02X) to %s (%08X)\n", val, region_str[addr >> 24], addr);
 }
 
-void write_16(mem_t* mem, u32 addr, u16 val) {
+void write_16(mem_t* mem, u32 pc, u32 addr, u16 val) {
   assert((addr & 1) == 0);
+
   switch(addr) {
   case 0x00004000 ... 0x01FFFFFF:
-    logdebug("[WARN][MEM] Open bus write! (%08X, %02X)\n", addr, val);
     break;
   case 0x02000000 ... 0x02FFFFFF:
-    logdebug("[INFO][MEM] Write (%04X) to eWRAM (%08X)\n", val, addr);
     *(u16*)&mem->eWRAM[addr & EWRAM_DSIZE] = val;
     break;
   case 0x03000000 ... 0x03FFFFFF:
-    logdebug("[INFO][MEM] Write (%04X) to iWRAM (%08X)\n", val, addr);
     *(u16*)&mem->iWRAM[addr & IWRAM_DSIZE] = val;
     break;
   case 0x04000000 ... 0x04000058:
-    logdebug("[INFO][MEM] Write (%04X) to IO (%08X)\n", val, addr);
-    write16_io_ppu(&mem->ppu, addr, val);
+    write16_io_ppu(&mem->ppu.io, addr, val);
+    break;
+  case 0x040000B0 ... 0x040000DF:
+    write16_io_dma(mem, addr, val);
     break;
   case 0x04000208:
-    logdebug("[INFO][MEM] Write (%02X) to IME (%08X) [WARN][STUB!]\n", val, addr);
     mem->ime = val;
     break;
   case 0x05000000 ... 0x05FFFFFF:
-    logdebug("[INFO][MEM] Write (%04X) to PRAM (%08X)\n", val, addr);
     *(u16*)&mem->ppu.pram[addr & PRAM_DSIZE] = val;
     break;
   case 0x06000000 ... 0x06FFFFFF:
-    logdebug("[INFO][MEM] Write (%04X) to VRAM (%08X)\n", val, addr);
     *(u16*)&mem->ppu.vram[addr & VRAM_DSIZE] = val;
     break;
   case 0x07000000 ... 0x07FFFFFF:
-    logdebug("[INFO][MEM] Write (%04X) to OAM (%08X)\n", val, addr);
     *(u16*)&mem->ppu.oam[addr & OAM_DSIZE] = val;
     break;
   default:
-    logfatal("[ERR ][MEM] Write to unhandled address! (addr: %08X, val: %04X)\n", addr, val);
+    logfatal("[ERR ][MEM] Write (%04X) to unhandled %s (%08X) (PC: %08X)!\n", val, region_str[addr >> 24], addr, pc);
   }
+  logdebug("[INFO][MEM] Write (%04X) to %s (%08X)\n", val, region_str[addr >> 24], addr);
 }
 
-void write_32(mem_t* mem, u32 addr, u32 val) {
+void write_32(mem_t* mem, u32 pc, u32 addr, u32 val) {
   assert((addr & 3) == 0);
+
   switch(addr) {
   case 0x00004000 ... 0x01FFFFFF:
-    logdebug("[WARN][MEM] Open bus write! (%08X, %02X)\n", addr, val);
     break;
   case 0x02000000 ... 0x02FFFFFF:
-    logdebug("[INFO][MEM] Write (%08X) to eWRAM (%08X)\n", val, addr);
     *(u32*)&mem->eWRAM[addr & EWRAM_DSIZE] = val;
     break;
   case 0x03000000 ... 0x03FFFFFF:
-    logdebug("[INFO][MEM] Write (%08X) to iWRAM (%08X)\n", val, addr);
     *(u32*)&mem->iWRAM[addr & IWRAM_DSIZE] = val;
     break;
   case 0x04000000 ... 0x04000058:
-    logdebug("[INFO][MEM] Write (%08X) to IO (%08X)\n", val, addr);
-    write32_io_ppu(&mem->ppu, addr, val);
+    write32_io_ppu(&mem->ppu.io, addr, val);
+    break;
+  case 0x040000B0 ... 0x040000DF:
+    write32_io_dma(mem, addr, val);
     break;
   case 0x04000208:
-    logdebug("[INFO][MEM] Write (%02X) to IME (%08X) [WARN][STUB!]\n", val, addr);
     mem->ime = val;
     break;
   case 0x05000000 ... 0x05FFFFFF:
-    logdebug("[INFO][MEM] Write (%08X) to PRAM (%08X)\n", val, addr);
     *(u32*)&mem->ppu.pram[addr & PRAM_DSIZE] = val;
     break;
   case 0x06000000 ... 0x06FFFFFF:
-    logdebug("[INFO][MEM] Write (%08X) to VRAM (%08X)\n", val, addr);
     *(u32*)&mem->ppu.vram[addr & VRAM_DSIZE] = val;
     break;
   case 0x07000000 ... 0x07FFFFFF:
-    logdebug("[INFO][MEM] Write (%08X) to OAM (%08X)\n", val, addr);
     *(u32*)&mem->ppu.oam[addr & OAM_DSIZE] = val;
     break;
   default:
-    logfatal("[WARN][MEM] Write to unhandled address! (addr: %08X, val: %08X)\n", addr, val);
+    logfatal("[WARN][MEM] Write (%08X) to unhandled %s (%08X) (PC: %08X)!\n", val, region_str[addr >> 24], addr, pc);
   }
+  logdebug("[INFO][MEM] Write (%08X) to %s (%08X)\n", val, region_str[addr >> 24], addr);
 }

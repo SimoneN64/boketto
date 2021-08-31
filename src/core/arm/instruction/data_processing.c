@@ -37,7 +37,7 @@ arm_handler arm_handle_data_processing(u32 instruction) {
     case 0b1001: return &arm_unimplemented_data_processing;
     case 0b1010: return &arm_cmp;
     case 0b1011: return &arm_unimplemented_data_processing;
-    case 0b1100: return &arm_unimplemented_data_processing;
+    case 0b1100: return &arm_orr;
     case 0b1101: return &arm_mov;
     case 0b1110: return &arm_unimplemented_data_processing;
     case 0b1111: return &arm_unimplemented_data_processing;
@@ -66,6 +66,32 @@ ARM_INSTRUCTION(mov) {
   logdebug(I ? "mov r%d, %08X\n" : "mov r%d, r%d\n", rd, I ? result : registers->instruction & 0xf);
 
   if(rd == PC) {
+    if(bit(registers->instruction, 20)) {
+      registers->cpsr.raw = registers->spsr.raw;
+      change_mode(registers, registers->cpsr.mode);
+    }
+    set_pc(false, mem, registers, result, registers->cpsr.thumb);
+  } else {
+    registers->gpr[rd] = result;
+    if(bit(registers->instruction, 20)) {
+      registers->cpsr.negative = result >> 31;
+      registers->cpsr.zero = result == 0;
+      registers->cpsr.carry = carry_out;
+    }
+  }
+}
+
+ARM_INSTRUCTION(orr) {
+  u8 rd = bits(registers->instruction, 12, 15);
+  u8 rn = bits(registers->instruction, 16, 19);
+
+  bool I = bit(registers->instruction, 25);
+  bool carry_out = registers->cpsr.carry;
+  u32 result = arm_data_processing_shift(registers, &carry_out);
+  logdebug(I ? "orr r%d, r%d, %08X" : "orr r%d, r%d, r%d", rd, rn, I ? result : registers->instruction & 0xf);
+  result |= registers->gpr[rn];
+
+  if(rd == 15) {
     if(bit(registers->instruction, 20)) {
       registers->cpsr.raw = registers->spsr.raw;
       change_mode(registers, registers->cpsr.mode);
