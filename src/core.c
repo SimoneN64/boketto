@@ -1,4 +1,4 @@
-#include "core.h"
+#include <core.h>
 #include <log.h>
 
 void init_core(core_t* core) {
@@ -7,6 +7,7 @@ void init_core(core_t* core) {
   init_scheduler(&core->scheduler);
   init_mem(&core->mem);
   init_ppu(&core->mem.ppu, &core->scheduler);
+  init_dma(&core->mem.dmac);
 	init_cpu(&core->cpu);
 }
 

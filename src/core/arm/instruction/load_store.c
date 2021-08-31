@@ -52,7 +52,7 @@ ARM_INSTRUCTION(stm) {
       if(before) {
         base_address += increment ? 4 : -4;
       }
-      write_32(mem, base_address, registers->gpr[i]);
+      write_32(mem, registers->gpr[PC], base_address, registers->gpr[i]);
       if(!before) {
         base_address += increment ? 4 : -4;
       }
@@ -83,7 +83,7 @@ ARM_INSTRUCTION(ldm) {
       if(before) {
         base_address += increment ? 4 : -4;
       }
-      registers->gpr[i] = read_32(mem, base_address);
+      registers->gpr[i] = read_32(mem, registers->gpr[PC], base_address);
       if(!before) {
         base_address += increment ? 4 : -4;
       }
@@ -110,7 +110,7 @@ ARM_INSTRUCTION(strh) {
 
   address &= ~1;
 
-  write_16(mem, address, registers->gpr[rd(instr)]);
+  write_16(mem, registers->gpr[PC], address, registers->gpr[rd(instr)]);
 
   if(W(instr) || !P(instr)) {
     if(!P(instr)) {
@@ -140,7 +140,7 @@ ARM_INSTRUCTION(ldrh) {
   }
 
   if(rd(instr) != 15) {
-    registers->gpr[rd(instr)] = read_16(mem, address);
+    registers->gpr[rd(instr)] = read_16(mem, registers->gpr[PC], address);
   } else {
     flush_pipe_32(registers, mem);
   }
@@ -174,7 +174,7 @@ ARM_INSTRUCTION(str) {
   if(B(instr)) {
     logfatal("strb!\n");
   } else {
-    write_32(mem, address, registers->gpr[rd(instr)]);
+    write_32(mem, registers->gpr[PC], address, registers->gpr[rd(instr)]);
   }
 
   if(W(instr) || !P(instr)) {
@@ -202,7 +202,7 @@ ARM_INSTRUCTION(ldr) {
   if(B(instr)) {
     logdebug("ldrb r%d, [r%d, %08X]\n", rd(instr), rn(instr), address);
     if(rd(instr) != 15) {
-      registers->gpr[rd(instr)] = read_8(mem, address);
+      registers->gpr[rd(instr)] = read_8(mem, registers->gpr[PC], address);
     } else {
       flush_pipe_32(registers, mem);
     }
@@ -210,7 +210,7 @@ ARM_INSTRUCTION(ldr) {
     address &= ~3;
     logdebug("ldr r%d, [r%d, %08X]\n", rd(instr), rn(instr), address);
     if(rd(instr) != 15) {
-      registers->gpr[rd(instr)] = read_32(mem, address);
+      registers->gpr[rd(instr)] = read_32(mem, registers->gpr[PC], address);
     } else {
       flush_pipe_32(registers, mem);
     }

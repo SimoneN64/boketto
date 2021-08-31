@@ -1,5 +1,5 @@
 #pragma once
-#include "common.h"
+#include <common.h>
 
 typedef union {
   struct {
@@ -60,3 +60,19 @@ typedef union {
 
   u16 raw;
 } bgvofs_t;
+
+typedef struct {
+  dispcnt_t dispcnt;
+  dispstat_t dispstat;
+  bgcnt_t bg0cnt, bg1cnt, bg2cnt, bg3cnt;
+  bgvofs_t bg0vofs, bg1vofs, bg2vofs, bg3vofs;
+  u16 bg0hofs, bg1hofs, bg2hofs, bg3hofs;
+  u16 vcount;
+} ppu_io_t;
+
+u8 read8_io_ppu(ppu_io_t* io, u32 addr);
+u16 read16_io_ppu(ppu_io_t* io, u32 addr);
+u32 read32_io_ppu(ppu_io_t* io, u32 addr);
+void write8_io_ppu(ppu_io_t* io, u32 addr, u8 val);
+void write16_io_ppu(ppu_io_t* io, u32 addr, u16 val);
+void write32_io_ppu(ppu_io_t* io, u32 addr, u32 val);
