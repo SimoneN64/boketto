@@ -4,3 +4,7 @@
 
 GBA emulator written in C11 with SDL2.
 It is early-dev, come back later :wink:
+
+## Special thanks
+- To @YetAnotherEmuDev and @wheremyfoodat for the great help in various components and finding bugs all over the place.
+- To @skylersaleh, @Dillonb, @DenSinH and, again, @YetAnotherEmuDev and @wheremyfoodat for the support in continuing the project, constantly.
