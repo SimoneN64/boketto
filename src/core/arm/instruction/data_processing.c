@@ -25,7 +25,7 @@ u32 arm_data_processing_shift(registers_t* regs, bool* carry_out) {
 
 arm_handler arm_handle_data_processing(u32 instruction) {
   switch(bits(instruction, 21, 24)) {
-    case 0b0000: return &arm_unimplemented_data_processing;
+    case 0b0000: return &arm_and;
     case 0b0001: return &arm_unimplemented_data_processing;
     case 0b0010: return &arm_unimplemented_data_processing;
     case 0b0011: return &arm_unimplemented_data_processing;
@@ -43,6 +43,19 @@ arm_handler arm_handle_data_processing(u32 instruction) {
     case 0b1111: return &arm_unimplemented_data_processing;
     default: return &arm_undefined_data_processing;
   }
+}
+
+ARM_INSTRUCTION(and) {
+  bool carry_out = registers->cpsr.carry;
+  bool I = bit(registers->instruction, 25);
+  u8 rn = bits(registers->instruction, 16, 19);
+  u8 rd = bits(registers->instruction, 12, 15);
+  u32 op1 = registers->gpr[rn], op2 = arm_data_processing_shift(registers, &carry_out);
+  logdebug(I ? "and r%d, r%d, %08X\n" : "and r%d, r%d, r%d\n", rd, rn, I ? op2 : registers->instruction & 0xf);
+  u32 result = op1 & op2;
+  registers->cpsr.negative = result >> 31;
+  registers->cpsr.zero = result == 0;
+  registers->cpsr.carry = carry_out;
 }
 
 ARM_INSTRUCTION(cmp) {

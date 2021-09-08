@@ -6,6 +6,7 @@ u32 arm_data_processing_shift(registers_t* regs, bool* carry_out);
 
 ARM_INSTRUCTION(mov);
 ARM_INSTRUCTION(add);
+ARM_INSTRUCTION(and);
 ARM_INSTRUCTION(orr);
 ARM_INSTRUCTION(tst);
 ARM_INSTRUCTION(cmp);

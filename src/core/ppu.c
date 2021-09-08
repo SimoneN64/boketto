@@ -62,7 +62,9 @@ void mode3(ppu_t* ppu) {
   u32 bufferIndex = ppu->io.vcount * GBA_W * DEPTH;
 
   for(int x = 0; x < GBA_W; x++) {
-    ppu->framebuffer[bufferIndex >> 1] = *(u16*)&ppu->vram[bufferIndex];
+    u16 raw_color = *(u16*)&ppu->vram[bufferIndex];
+    ppu->framebuffer[bufferIndex >> 1] = (color5_to_8(raw_color & 0x1F) << 24) | (color5_to_8((raw_color >> 5) & 0x1F) << 16)
+                                       | (color5_to_8((raw_color >> 10) & 0x1F) << 8) | 0xff;
     bufferIndex += DEPTH;
   }
 }
@@ -72,7 +74,9 @@ void mode4(ppu_t* ppu) {
   u32 bufferIndex = vramIndex;
   for(int x = 0; x < GBA_W; x++) {
     const u32 paletteIndex = ppu->vram[vramIndex] * 2;
-    ppu->framebuffer[bufferIndex] = *(u16*)&ppu->pram[paletteIndex];
+    u16 raw_color = *(u16*)&ppu->pram[paletteIndex];
+    ppu->framebuffer[bufferIndex] = (color5_to_8(raw_color & 0x1F) << 24) | (color5_to_8((raw_color >> 5) & 0x1F) << 16)
+                                  | (color5_to_8((raw_color >> 10) & 0x1F) << 8) | 0xff;
 
     ++vramIndex;
     ++bufferIndex;

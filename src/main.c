@@ -1,16 +1,16 @@
-#include "window.h"
+#include <window.h>
 
 int main() {
   window_t window;
-	core_t core;
-	
-	init_window(&window, "ボケット", GBA_W * 3, GBA_H * 3);
-	init_core(&core);
+  core_t core;
 
-	main_loop(&window, &core);
+  init_core(&core);
+  init_window(&core, &window, "ボケット");
 
-	destroy_core(&core);
-	destroy_window(&window);
+  main_loop(&window, &core);
+
+  destroy_core(&core);
+  destroy_window(&window);
 
 	return 0;
 }

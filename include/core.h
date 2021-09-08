@@ -3,7 +3,6 @@
 #include "mem.h"
 #include "scheduler.h"
 #include <nfd.h>
-#define infinite_loop while(1)
 
 typedef struct {
 	u64 cycles;

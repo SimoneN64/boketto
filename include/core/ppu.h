@@ -8,7 +8,7 @@ typedef struct {
   u8 pram[PRAM_SIZE];
   u8 oam[OAM_SIZE];
   ppu_io_t io;
-  u16 framebuffer[GBA_W * GBA_H];
+  u32 framebuffer[GBA_W * GBA_H];
   bool frame_finished;
 } ppu_t;
 
