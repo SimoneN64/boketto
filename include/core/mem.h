@@ -1,6 +1,7 @@
 #pragma once
 #include <ppu.h>
 #include <dma.h>
+#include <scheduler.h>
 
 typedef struct mem_t {
   u8 bios[BIOS_SIZE];
@@ -15,7 +16,7 @@ typedef struct mem_t {
 
 struct registers_t;
 
-void init_mem(mem_t* mem);
+void init_mem(mem_t* mem, scheduler_t* scheduler);
 void load_rom(mem_t* mem, const char* path);
 
 u8  read_8 (mem_t* mem, u32 pc, u32 addr);

@@ -5,9 +5,7 @@ void init_core(core_t* core) {
 	core->cycles = 0;
 	core->running = false;
   init_scheduler(&core->scheduler);
-  init_mem(&core->mem);
-  init_ppu(&core->mem.ppu, &core->scheduler);
-  init_dma(&core->mem.dmac);
+  init_mem(&core->mem, &core->scheduler);
 	init_cpu(&core->cpu);
 }
 
@@ -15,7 +13,7 @@ void destroy_core(core_t* core) {
   core->running = false;
 }
 
-void run_frame(core_t* core) {
+void run_frame(core_t* core) { // asan has encountered a fatal error?
   core->mem.ppu.frame_finished = false;
   if(core->running) {
     while(!core->mem.ppu.frame_finished) {

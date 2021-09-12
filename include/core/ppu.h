@@ -2,13 +2,15 @@
 #include <bit.h>
 #include <lcd.h>
 #include <scheduler.h>
+#include <stdatomic.h>
 
 typedef struct {
   u8 vram[VRAM_SIZE];
   u8 pram[PRAM_SIZE];
   u8 oam[OAM_SIZE];
   ppu_io_t io;
-  u32 framebuffer[GBA_W * GBA_H];
+  atomic_uint_fast8_t current_framebuffer;
+  u32 framebuffers[2][GBA_W * GBA_H];
   bool frame_finished;
 } ppu_t;
 

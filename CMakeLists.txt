@@ -52,17 +52,16 @@ include_directories(
 if(WIN32)
   set(FLAGS -static glfw OpenGL::GL gcc stdc++ winpthread winmm version Imm32 Setupapi)
 else()
-  set(FLAGS glfw OpenGL::GL)
+  set(FLAGS pthread glfw OpenGL::GL)
 endif()
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
   add_compile_options(-g)
   add_compile_definitions(DEBUG)
+  #add_link_options(-fsanitize=address)
 elseif(CMAKE_BUILD_TYPE MATCHES Release)
-  add_compile_options(-O3)
+  add_compile_options(-O2)
 endif()
-
-#add_link_options(-fsanitize=address)
 
 add_executable(${CMAKE_PROJECT_NAME}
   ${EMU_SRC}

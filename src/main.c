@@ -1,16 +1,11 @@
-#include <window.h>
+#include <gui.h>
 
 int main() {
-  window_t window;
-  core_t core;
+  gui_t gui;
+  init_gui(&gui, "ボケット");
 
-  init_core(&core);
-  init_window(&core, &window, "ボケット");
+  main_loop(&gui);
 
-  main_loop(&window, &core);
-
-  destroy_core(&core);
-  destroy_window(&window);
-
+  destroy_gui(&gui);
 	return 0;
 }

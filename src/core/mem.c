@@ -2,10 +2,12 @@
 #include <stdio.h>
 #include "log.h"
 
-void init_mem(mem_t* mem) {
+void init_mem(mem_t* mem, scheduler_t* scheduler) {
   memset(mem->bios, 0, BIOS_SIZE);
   memset(mem->iWRAM, 0, IWRAM_SIZE);
   memset(mem->eWRAM, 0, EWRAM_SIZE);
+  init_ppu(&mem->ppu, scheduler);
+  init_dma(&mem->dmac);
 }
 
 void load_rom(mem_t* mem, const char* path) {
@@ -29,6 +31,7 @@ void load_rom(mem_t* mem, const char* path) {
   memset(&mem->rom[rom_size], 0, rounded_rom_size - rom_size);
 
   fclose(fp);
+  printf("%s opened!\n", path);
 }
 
 static const inline char* region_str(u32 addr) {

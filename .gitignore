@@ -4,6 +4,9 @@ roms/
 *.dll
 *.bin
 *.ini
+*.json
+*.log
+.cache/
 vgcore.*
 .vscode/
 *.dump
