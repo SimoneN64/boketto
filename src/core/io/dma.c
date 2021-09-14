@@ -52,7 +52,7 @@ void set_dma_channel_control(mem_t* mem, u8 i, u16 val) {
     if (channel->control.type) {
       do {
         write_32(mem, 0xDEADBEEF, channel->current_dad, read_32(mem, 0xCAFEBABE, channel->current_sad));
-        logdebug("[INFO][DMA] Source address: %08X Destination address: %08X Remaining units: %08X\n", channel->current_sad, channel->current_dad, channel->remaining_units);
+        
         channel->current_sad += channel->sad_increment;
         channel->current_dad += channel->dad_increment;
         channel->remaining_units = (channel->remaining_units - 1) & channel->unit_count_mask;
@@ -60,7 +60,7 @@ void set_dma_channel_control(mem_t* mem, u8 i, u16 val) {
     } else {
       do {
         write_16(mem, 0xDEADCAFE, channel->current_dad, read_16(mem, 0xCAFEBEEF, channel->current_sad));
-        logdebug("[INFO][DMA] Source address: %08X Destination address: %08X Remaining units: %08X\n", channel->current_sad, channel->current_dad, channel->remaining_units);
+        
         channel->current_sad += channel->sad_increment;
         channel->current_dad += channel->dad_increment;
         channel->remaining_units = (channel->remaining_units - 1) & channel->unit_count_mask;

@@ -40,7 +40,7 @@ ARM_INSTRUCTION(stm) {
   u32 base_address = registers->gpr[rn];
 
   u16 list_mask = registers->instruction & 0xffff;
-  print_list(false, registers->instruction);
+  
   bool increment = bit(registers->instruction, 23);
   bool before = bit(registers->instruction, 24);
 
@@ -71,7 +71,7 @@ ARM_INSTRUCTION(ldm) {
   u32 base_address = registers->gpr[rn];
 
   u16 list_mask = registers->instruction & 0xffff;
-  print_list(false, registers->instruction);
+  
   bool increment = bit(registers->instruction, 23);
   bool before = bit(registers->instruction, 24);
 
@@ -102,7 +102,7 @@ ARM_INSTRUCTION(strh) {
   u32 address = registers->gpr[rn(instr)];
   u32 offset = I ? (bits(instr, 8, 11) << 4) | (instr & 0xf) : registers->gpr[rm(instr)];
 
-  logdebug("strh r%d, [r%d, %08X]\n", rd(instr), rn(instr), offset);
+  
 
   if(P(instr)) {
     address = U(instr) ? address + offset : address - offset;
@@ -133,7 +133,7 @@ ARM_INSTRUCTION(ldrh) {
 
   address &= ~1;
 
-  logdebug("ldrh r%d, [r%d, %08X]\n", rd(instr), rn(instr), offset);
+  
 
   if(P(instr)) {
     address = U(instr) ? address + offset : address - offset;
@@ -169,7 +169,7 @@ ARM_INSTRUCTION(str) {
 
   address &= ~3;
 
-  logdebug("str r%d, [r%d, %08X]\n", rd(instr), rn(instr), address);
+  
 
   if(B(instr)) {
     logfatal("strb!\n");
@@ -200,7 +200,7 @@ ARM_INSTRUCTION(ldr) {
   }
 
   if(B(instr)) {
-    logdebug("ldrb r%d, [r%d, %08X]\n", rd(instr), rn(instr), address);
+    
     if(rd(instr) != 15) {
       registers->gpr[rd(instr)] = read_8(mem, registers->gpr[PC], address);
     } else {
@@ -208,7 +208,7 @@ ARM_INSTRUCTION(ldr) {
     }
   } else {
     address &= ~3;
-    logdebug("ldr r%d, [r%d, %08X]\n", rd(instr), rn(instr), address);
+    
     if(rd(instr) != 15) {
       registers->gpr[rd(instr)] = read_32(mem, registers->gpr[PC], address);
     } else {

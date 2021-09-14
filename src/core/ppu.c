@@ -6,8 +6,7 @@ void init_ppu(ppu_t* ppu, scheduler_t* scheduler) {
   memset(ppu->vram, 0, VRAM_SIZE);
   memset(ppu->pram, 0, PRAM_SIZE);
   memset(ppu->oam, 0, OAM_SIZE);
-  memset(ppu->framebuffers[0], 0, GBA_W * GBA_H * DEPTH);
-  memset(ppu->framebuffers[1], 0, GBA_W * GBA_H * DEPTH);
+  memset(ppu->framebuffers, 0, 2 * GBA_W * GBA_H * DEPTH);
   atomic_init(&ppu->current_framebuffer, 0);
   ppu->frame_finished = false;
 
@@ -30,7 +29,7 @@ void hdraw_dispatch(ppu_t* ppu, const u64 time, scheduler_t* scheduler) {
   case 228:
     ppu->frame_finished = true;
     atomic_store(&ppu->current_framebuffer, ppu->current_framebuffer ^ 1);
-    printf("swapping framebuffer: %d\n", ppu->current_framebuffer);
+    //printf("swapping framebuffer: %d\n", ppu->current_framebuffer);
     ppu->io.vcount = 0;
     ppu->io.dispstat.vb = 0;
     break;
@@ -80,7 +79,7 @@ void mode4(ppu_t* ppu) {
     const u32 paletteIndex = ppu->vram[bufferIndex];
     u16 raw_color = *(u16*)&ppu->pram[paletteIndex << 1];
     framebuffer[bufferIndex] = (color5_to_8(raw_color) << 24) | (color5_to_8(raw_color >> 5) << 16)
-                             | (color5_to_8(raw_color >> 10) << 8) | 0xff;
+                                  | (color5_to_8(raw_color >> 10) << 8) | 0xff;
     ++bufferIndex;
   }
 }

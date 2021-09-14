@@ -51,7 +51,7 @@ ARM_INSTRUCTION(and) {
   u8 rn = bits(registers->instruction, 16, 19);
   u8 rd = bits(registers->instruction, 12, 15);
   u32 op1 = registers->gpr[rn], op2 = arm_data_processing_shift(registers, &carry_out);
-  logdebug(I ? "and r%d, r%d, %08X\n" : "and r%d, r%d, r%d\n", rd, rn, I ? op2 : registers->instruction & 0xf);
+  
   u32 result = op1 & op2;
   registers->cpsr.negative = result >> 31;
   registers->cpsr.zero = result == 0;
@@ -63,7 +63,7 @@ ARM_INSTRUCTION(cmp) {
   bool I = bit(registers->instruction, 25);
   u8 rn = bits(registers->instruction, 16, 19);
   u32 op1 = registers->gpr[rn], op2 = arm_data_processing_shift(registers, &dummy);
-  logdebug(I ? "cmp r%d, %08X\n" : "cmp r%d, r%d\n", rn, I ? op2 : registers->instruction & 0xf);
+  
   u32 result = op1 - op2;
   registers->cpsr.negative = result >> 31;
   registers->cpsr.carry = result <= op1;
@@ -76,7 +76,7 @@ ARM_INSTRUCTION(mov) {
   bool I = bit(registers->instruction, 25);
   bool carry_out = registers->cpsr.carry;
   u32 result = arm_data_processing_shift(registers, &carry_out);
-  logdebug(I ? "mov r%d, %08X\n" : "mov r%d, r%d\n", rd, I ? result : registers->instruction & 0xf);
+  
 
   if(rd == PC) {
     if(bit(registers->instruction, 20)) {
@@ -101,7 +101,7 @@ ARM_INSTRUCTION(orr) {
   bool I = bit(registers->instruction, 25);
   bool carry_out = registers->cpsr.carry;
   u32 result = arm_data_processing_shift(registers, &carry_out);
-  logdebug(I ? "orr r%d, r%d, %08X" : "orr r%d, r%d, r%d", rd, rn, I ? result : registers->instruction & 0xf);
+  
   result |= registers->gpr[rn];
 
   if(rd == 15) {
@@ -128,7 +128,7 @@ ARM_INSTRUCTION(add) {
   u32 op1 = arm_data_processing_shift(registers, &dummy);
   u32 op2 = registers->gpr[rn];
   u32 result = op1 + op2;
-  logdebug(I ? "add r%d, r%d, %08X\n" : "add r%d, r%d, r%d\n", rd, rn, I ? op1 : registers->instruction & 0xf);
+  
 
   if(rd == PC) {
     if(bit(registers->instruction, 20)) {
@@ -153,7 +153,7 @@ ARM_INSTRUCTION(tst) {
   u8 rn = bits(registers->instruction, 16, 19);
   u32 op1 = registers->gpr[rn];
   u32 op2 = arm_data_processing_shift(registers, &carry_out);
-  logdebug(I ? "tst r%d, %08X\n" : "tst r%d, r%d\n", rn, I ? op2 : registers->instruction & 0xf);
+  
   u32 res = op1 & op2;
   registers->cpsr.negative = res >> 31;
   registers->cpsr.zero = res == 0;

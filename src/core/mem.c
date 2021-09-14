@@ -11,7 +11,7 @@ void init_mem(mem_t* mem, scheduler_t* scheduler) {
 }
 
 void load_rom(mem_t* mem, const char* path) {
-  logdebug("Loading rom: %s\n", path);
+  
   FILE* fp = fopen(path, "rb");
   if(fp == NULL) {
     logfatal("Failed to open rom %s\n", path);
@@ -20,7 +20,7 @@ void load_rom(mem_t* mem, const char* path) {
   fseek(fp, 0, SEEK_END);
   size_t rom_size = ftell(fp);
   size_t rounded_rom_size = next_power_of_two(rom_size);
-  logdebug("Rom size: %zu (rounded to %zu)\n", rom_size, rounded_rom_size);
+  
   mem->rom_size = rounded_rom_size;
   fseek(fp, 0, SEEK_SET);
 
@@ -31,7 +31,6 @@ void load_rom(mem_t* mem, const char* path) {
   memset(&mem->rom[rom_size], 0, rounded_rom_size - rom_size);
 
   fclose(fp);
-  printf("%s opened!\n", path);
 }
 
 static const inline char* region_str(u32 addr) {
@@ -67,7 +66,7 @@ u8 read_8(mem_t* mem, u32 pc, u32 addr) {
     val = mem->bios[addr];
     break;
   case 0x00004000 ... 0x01FFFFFF:
-    logdebug("[INFO][MEM] Read from Open Bus (STUB!) (%08X)\n", addr);
+    
     return 0xff;
   case 0x02000000 ... 0x02FFFFFF:
     val = mem->eWRAM[addr & EWRAM_DSIZE];
@@ -100,7 +99,7 @@ u8 read_8(mem_t* mem, u32 pc, u32 addr) {
     logfatal("[ERR ][MEM] Read from unhandled %s! (%08X) (PC: %08X)\n", region_str(addr), addr, pc);
   }
 
-  logdebug("[INFO][MEM] Read from %s (%08X)\n", region_str(addr), addr);
+  
   return val;
 }
 
@@ -113,7 +112,7 @@ u16 read_16(mem_t* mem, u32 pc, u32 addr) {
     val = *(u16*)&mem->bios[addr];
     break;
   case 0x00004000 ... 0x01FFFFFF:
-    logdebug("[INFO][MEM] Read from Open Bus (STUB!) (%08X)\n", addr);
+    
     return 0xffff;
   case 0x02000000 ... 0x02FFFFFF:
     val = *(u16*)&mem->eWRAM[addr & EWRAM_DSIZE];
@@ -146,7 +145,7 @@ u16 read_16(mem_t* mem, u32 pc, u32 addr) {
     logfatal("[ERR ][MEM] Read from unhandled %s! (%08X) (PC: %08X)\n", region_str(addr), addr, pc);
   }
 
-  logdebug("[INFO][MEM] Read from %s (%08X)\n", region_str(addr), addr);
+  
   return val;
 }
 
@@ -159,7 +158,7 @@ u32 read_32(mem_t* mem, u32 pc, u32 addr) {
     val = *(u32*)&mem->bios[addr];
     break;
   case 0x00004000 ... 0x01FFFFFF:
-    logdebug("[INFO][MEM] Read from Open Bus (STUB!) (%08X)\n", addr);
+    
     return 0xffffffff;
   case 0x02000000 ... 0x02FFFFFF:
     val = *(u32*)&mem->eWRAM[addr & EWRAM_DSIZE];
@@ -192,7 +191,7 @@ u32 read_32(mem_t* mem, u32 pc, u32 addr) {
     logfatal("[WARN][MEM] Read from unhandled %s! (%08X) (PC: %08X)\n", region_str(addr), addr, pc);
   }
 
-  logdebug("[INFO][MEM] Read from %s (%08X)\n", region_str(addr), addr);
+  
   return val;
 }
 
@@ -225,7 +224,7 @@ void write_8(mem_t* mem, u32 pc, u32 addr, u8 val) {
   default:
     logfatal("[ERR ][MEM] Write (%02X) to unhandled %s (%08X) (PC: %08X)!\n", val, region_str(addr), addr, pc);
   }
-  logdebug("[INFO][MEM] Write (%02X) to %s (%08X)\n", val, region_str(addr), addr);
+  
 }
 
 void write_16(mem_t* mem, u32 pc, u32 addr, u16 val) {
@@ -262,7 +261,7 @@ void write_16(mem_t* mem, u32 pc, u32 addr, u16 val) {
     logfatal("[ERR ][MEM] Write (%04X) to unhandled %s (%08X) (PC: %08X)!\n", val, region_str(addr), addr, pc);
   }
 
-  logdebug("[INFO][MEM] Write (%04X) to %s (%08X)\n", val, region_str(addr), addr);
+  
 }
 
 void write_32(mem_t* mem, u32 pc, u32 addr, u32 val) {
@@ -298,5 +297,5 @@ void write_32(mem_t* mem, u32 pc, u32 addr, u32 val) {
   default:
     logfatal("[WARN][MEM] Write (%08X) to unhandled %s (%08X) (PC: %08X)!\n", val, region_str(addr), addr, pc);
   }
-  logdebug("[INFO][MEM] Write (%08X) to %s (%08X)\n", val, region_str(addr), addr);
+  
 }

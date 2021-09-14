@@ -69,4 +69,4 @@ add_executable(${CMAKE_PROJECT_NAME}
 )
 
 # So it links to GLFW but just forgets about it afterwards
-target_link_libraries(${CMAKE_PROJECT_NAME} ${FLAGS} ${CMAKE_DL_LIBS} nfd cimgui)
+target_link_libraries(${CMAKE_PROJECT_NAME} ${FLAGS} ${CMAKE_DL_LIBS} nfd cimgui capstone)

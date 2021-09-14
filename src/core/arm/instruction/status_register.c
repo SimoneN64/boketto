@@ -26,12 +26,12 @@ ARM_INSTRUCTION(msr) {
 
   if(bit(registers->instruction, 22)) {
     registers->spsr.raw = (registers->spsr.raw & ~mask) | (operand & mask);
-    logdebug("msr spsr, %s\n", operand_str);
+    
   } else {
     u32 val = (registers->cpsr.raw & ~mask) | (operand & mask);
     change_mode(registers, val & 0x1f);
     registers->cpsr.raw = val;
-    logdebug("msr cpsr, %s\n", operand_str);
+    
   }
 }
 
@@ -39,9 +39,9 @@ ARM_INSTRUCTION(mrs) {
   u8 rd = (registers->instruction >> 12) & 0xf;
   if(bit(registers->instruction, 22)) {
     registers->gpr[rd] = registers->spsr.raw;
-    logdebug("msr r%d, spsr\n", rd);
+    
   } else {
     registers->gpr[rd] = registers->cpsr.raw;
-    logdebug("msr r%d, cpsr\n", rd);
+    
   }
 }

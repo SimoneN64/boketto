@@ -12,7 +12,7 @@ static inline void print_push_pop(u32 instruction) {
 
   u16 list_mask = instruction & 0x1ff;
   bool is_end = false;
-  logdebug(bit(instruction, 11) ? "pop { " : "push { ");
+  
 
   for(int i = 0; i < 9; i++) {
     if(((list_mask >> (i + 1)) & (0x1ff >> (i + 1))) == 0) {
@@ -20,11 +20,11 @@ static inline void print_push_pop(u32 instruction) {
     }
 
     if(bit(instruction, i)) {
-      logdebug(is_end ? "%s" : "%s, ", reg_names[i]);
+      
     }
   }
 
-  logdebug(" }\n");
+  
 #endif
 }
 
@@ -80,7 +80,7 @@ THUMB_INSTRUCTION(asr_imm) {
   u8 rd = registers->instruction & 7;
   u8 rm = bits(registers->instruction,3, 5);
   u8 imm = bits(registers->instruction, 6, 10);
-  logdebug("asr r%d, r%d, #%02X\n", rd, rm, imm);
+  
   if(imm == 0) {
     registers->cpsr.carry = registers->gpr[rm] >> 31;
     registers->gpr[rd] = (s32)registers->gpr[rm] >> 31;

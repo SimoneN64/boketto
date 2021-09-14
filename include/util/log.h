@@ -1,8 +1,3 @@
 #pragma once
 #include <stdio.h>
 #define logfatal(fmt, ...) do { printf(fmt, ##__VA_ARGS__); exit(1); } while(0)
-#ifdef DEBUG
-#define logdebug(fmt, ...) do { printf(fmt, ##__VA_ARGS__); } while(0)
-#else
-#define logdebug(fmt, ...)
-#endif
