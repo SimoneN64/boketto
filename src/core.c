@@ -9,10 +9,6 @@ void init_core(core_t* core) {
 	init_cpu(&core->cpu);
 }
 
-void destroy_core(core_t* core) {
-  core->running = false;
-}
-
 void run_frame(core_t* core) { // asan has encountered a fatal error?
   core->mem.ppu.frame_finished = false;
   if(core->running) {

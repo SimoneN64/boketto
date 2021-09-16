@@ -29,7 +29,6 @@ void hdraw_dispatch(ppu_t* ppu, const u64 time, scheduler_t* scheduler) {
   case 228:
     ppu->frame_finished = true;
     atomic_store(&ppu->current_framebuffer, ppu->current_framebuffer ^ 1);
-    //printf("swapping framebuffer: %d\n", ppu->current_framebuffer);
     ppu->io.vcount = 0;
     ppu->io.dispstat.vb = 0;
     break;
@@ -79,7 +78,7 @@ void mode4(ppu_t* ppu) {
     const u32 paletteIndex = ppu->vram[bufferIndex];
     u16 raw_color = *(u16*)&ppu->pram[paletteIndex << 1];
     framebuffer[bufferIndex] = (color5_to_8(raw_color) << 24) | (color5_to_8(raw_color >> 5) << 16)
-                                  | (color5_to_8(raw_color >> 10) << 8) | 0xff;
+                             | (color5_to_8(raw_color >> 10) << 8) | 0xff;
     ++bufferIndex;
   }
 }

@@ -18,15 +18,22 @@ static const ImVec2 ONE = {.x = 1, .y = 1};
 static const ImVec2 MAX = {.x = __FLT_MAX__, .y = __FLT_MAX__};
 static const ImVec4 ZERO4 = {.x = 0, .y = 0, .z = 0, .w = 0};
 static const ImVec4 FULL4 = {.x = 1, .y = 1, .z = 1, .w = 1};
-static const ImVec4 RED = {.x = 1, .y = 0, .z = 0, .w = 1};
-static const ImVec4 ORANGE = {.x = 1, .y = 0.619, .z = 0, .w = 1};
-static const ImVec4 YELLOW = {.x = 1, .y = 0.988, .z = 0, .w = 1};
+
+static const ImVec4 colors_disasm[3] = {{.x = 1, .y = 0.000, .z = 0, .w = 1}, 
+                                        {.x = 1, .y = 0.619, .z = 0, .w = 1}, 
+                                        {.x = 1, .y = 0.988, .z = 0, .w = 1}};
+
+static const char* mode_str[32] = {
+  [0] = "", [16] = "User", "FIQ", "IRQ", "Supervisor", [23] = "Abort", [27] = "Undefined", [31] = "System"
+};
 
 typedef struct {
   core_t* core;
   csh handle;
   cs_insn* insn;
   size_t count;
+  unsigned int id; // OpenGL framebuffer texture ID
+  u32 converted_vram[VRAM_SIZE];
 } debugger_t;
 
 typedef struct {
@@ -53,3 +60,4 @@ void main_menubar(gui_t* gui);
 void debugger_window(gui_t* gui);
 void disassembly(gui_t* gui);
 void registers_view(gui_t* gui);
+void vram_view(gui_t* gui);

@@ -66,7 +66,21 @@ void init_gui(gui_t* gui, const char* title) {
   
   glGenTextures(1, &gui->id);
   glBindTexture(GL_TEXTURE_2D, gui->id);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, GBA_W, GBA_H, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, framebuffer);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GBA_W, GBA_H, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, framebuffer);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+  for(int i = 0; i < VRAM_SIZE; i += 2) {
+    u16 raw = gui->core.mem.ppu.vram[i];
+    gui->debugger.converted_vram[i >> 1] = (color5_to_8(raw) << 24) | (color5_to_8(raw >> 5) << 16)
+                                         | (color5_to_8(raw >> 10) << 8) | 0xff;
+  }
+  
+  glGenTextures(1, &gui->debugger.id);
+  glBindTexture(GL_TEXTURE_2D, gui->debugger.id);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, VRAM_W, VRAM_H, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, gui->debugger.converted_vram);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -108,6 +122,15 @@ void update_texture(gui_t* gui) {
 
   glBindTexture(GL_TEXTURE_2D, gui->id);
   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, GBA_W, GBA_H, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, framebuffer);
+
+  for(int i = 0; i < VRAM_SIZE; i += 2) {
+    u16 raw = *(u16*)&gui->core.mem.ppu.vram[i];
+    gui->debugger.converted_vram[i >> 1] = (color5_to_8(raw) << 24) | (color5_to_8(raw >> 5) << 16)
+                                         | (color5_to_8(raw >> 10) << 8) | 0xff;
+  }
+
+  glBindTexture(GL_TEXTURE_2D, gui->debugger.id);
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, VRAM_W, VRAM_H, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, gui->debugger.converted_vram);
 }
 
 void main_menubar(gui_t *gui) {
@@ -125,6 +148,11 @@ void main_menubar(gui_t *gui) {
       if(igMenuItem_Bool(gui->core.running ? "Pause" : "Resume", "P", false, gui->rom_loaded)) {
         gui->core.running = !gui->core.running;
       }
+      if(igMenuItem_Bool("Stop", NULL, false, gui->rom_loaded)) {
+        init_core(&gui->core);
+        gui->rom_loaded = false;
+        gui->rom_file = "";
+      }
       igEndMenu();
     }
     igEndMainMenuBar();
@@ -133,34 +161,36 @@ void main_menubar(gui_t *gui) {
 
 void disassembly(gui_t *gui) {
   u32 instructions[25];
+  u32 pc = gui->core.cpu.regs.gpr[PC];
+  u32 pointer = pc - (14 * 4);
   if(gui->rom_loaded) {
-    u32 pointer = gui->core.cpu.regs.gpr[PC] - 14 * 4;
     for(int i = 0; i < 25; i++) {
       instructions[i] = read_32(&gui->core.mem, pointer + i * 4, pointer + i * 4);
     }
   } else {
-    memset(instructions, 0xFFFFFFFF, 25 * 4);
+    memset(instructions, 0xFFFFFFFF, 100);
   }
-  
-  u8 code[100];
 
+  u8 code[100];
   memcpy(code, instructions, 100);
-  gui->debugger.count = cs_disasm(gui->debugger.handle, code, sizeof(code), gui->core.cpu.regs.gpr[PC], 0, &gui->debugger.insn);
+  
+  gui->debugger.count = cs_disasm(gui->debugger.handle, code, sizeof(code), pointer, 25, &gui->debugger.insn);
   igBegin("Disassembly", NULL, 0);
   if(gui->debugger.count > 0) {
+    ImVec2 window_size;
+    igGetWindowSize(&window_size);
     for(size_t j = 0; j < gui->debugger.count; j++) {
+      const float font_size = igGetFontSize() * strlen(gui->debugger.insn[j].op_str) / 2;
       switch(j) {
-      case 12:
-        igTextColored(RED, "0x%"PRIx64":\t%s\t\t%s", gui->debugger.insn[j].address, gui->debugger.insn[j].mnemonic, gui->debugger.insn[j].op_str);
-        break;
-      case 13:
-        igTextColored(ORANGE, "0x%"PRIx64":\t%s\t\t%s", gui->debugger.insn[j].address, gui->debugger.insn[j].mnemonic, gui->debugger.insn[j].op_str);
-        break;
-      case 14:
-        igTextColored(YELLOW, "0x%"PRIx64":\t%s\t\t%s", gui->debugger.insn[j].address, gui->debugger.insn[j].mnemonic, gui->debugger.insn[j].op_str);
+      case 12 ... 14:
+        igTextColored(colors_disasm[j & 3], "0x%"PRIx64":\t%s", gui->debugger.insn[j].address, gui->debugger.insn[j].mnemonic);
+        igSameLine(window_size.x - font_size, -1);
+        igTextColored(colors_disasm[j & 3], "%s", gui->debugger.insn[j].op_str);
         break;
       default:
-        igText("0x%"PRIx64":\t%s\t\t%s", gui->debugger.insn[j].address, gui->debugger.insn[j].mnemonic, gui->debugger.insn[j].op_str);
+        igText("0x%"PRIx64":\t%s", gui->debugger.insn[j].address, gui->debugger.insn[j].mnemonic);
+        igSameLine(window_size.x - font_size, -1);
+        igText("%s", gui->debugger.insn[j].op_str);
       }
     }
 
@@ -172,17 +202,41 @@ void disassembly(gui_t *gui) {
 }
 
 void registers_view(gui_t *gui) {
+  u32* regs = gui->core.cpu.regs.gpr;
+  psr_t cpsr = gui->core.cpu.regs.cpsr;
+  psr_t spsr = gui->core.cpu.regs.spsr;
   igBegin("Registers view", NULL, 0);
-  igText("r0:  %08X r1: %08X r2:  %08X r3:  %08X", gui->core.cpu.regs.gpr[0], gui->core.cpu.regs.gpr[1], gui->core.cpu.regs.gpr[2], gui->core.cpu.regs.gpr[3]);
-  igText("r4:  %08X r5: %08X r6:  %08X r7:  %08X", gui->core.cpu.regs.gpr[4], gui->core.cpu.regs.gpr[5], gui->core.cpu.regs.gpr[6], gui->core.cpu.regs.gpr[7]);
-  igText("r8:  %08X r9: %08X r10: %08X r11: %08X", gui->core.cpu.regs.gpr[8], gui->core.cpu.regs.gpr[9], gui->core.cpu.regs.gpr[10], gui->core.cpu.regs.gpr[11]);
-  igText("r12: %08X sp: %08X lr:  %08X pc:  %08X", gui->core.cpu.regs.gpr[12], gui->core.cpu.regs.gpr[13], gui->core.cpu.regs.gpr[LR], gui->core.cpu.regs.gpr[PC]);
+  for(int i = 0; i < 16; i+=4) {
+    igText("r%d: %08X r%d: %08X r%d: %08X r%d: %08X", i, regs[i], i + 1, regs[i + 1], i + 2, regs[i + 2], i + 3, regs[i + 3]);
+  }
+  igText("CPSR: %08X", cpsr.raw);
+  igText("SPSR: %08X", spsr.raw);
+  igSeparator();
+  igText("Current PSR state:");
+  igText("Negative: %d Zero: %d Carry: %d Overflow: %d", cpsr.negative, cpsr.zero, cpsr.carry, cpsr.overflow);
+  igText("IRQ Disable: %d FIQ Disable: %d", cpsr.irq, cpsr.fiq);
+  igText("Thumb %d", cpsr.thumb);
+  igText("Mode: %s", mode_str[cpsr.mode]);
+  igSeparator();
+  igText("Saved PSR state:");
+  igText("Negative: %d Zero: %d Carry: %d Overflow: %d", spsr.negative, spsr.zero, spsr.carry, spsr.overflow);
+  igText("IRQ Disable: %d FIQ Disable: %d", spsr.irq, spsr.fiq);
+  igText("Thumb %d", spsr.thumb);
+  igText("Mode: %s", mode_str[spsr.mode]);
+  igEnd();
+}
+
+void vram_view(gui_t* gui) {
+  igBegin("VRAM view", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+  ImVec2 vram_size = {.x = VRAM_W * 1.5, .y = VRAM_H * 1.5};
+  igImage((ImTextureID)((intptr_t)gui->debugger.id), vram_size, ZERO, ONE, FULL4, ZERO4);
   igEnd();
 }
 
 void debugger_window(gui_t* gui) {
   disassembly(gui);
   registers_view(gui);
+  vram_view(gui);
 }
 
 void main_loop(gui_t* gui) {
@@ -206,7 +260,7 @@ void main_loop(gui_t* gui) {
     
     igSetNextWindowSizeConstraints(ZERO, MAX, resize_callback, NULL);
     igBegin("Display", NULL, ImGuiWindowFlags_NoTitleBar);
-    ImVec2 window_size, title_bar_size;
+    ImVec2 window_size;
     igGetWindowSize(&window_size);
     ImVec2 result = {.x = (window_size.x - image_size.x) * 0.5, .y = (window_size.y - image_size.y) * 0.5};
     igSetCursorPos(result);
@@ -227,7 +281,6 @@ void main_loop(gui_t* gui) {
 void destroy_gui(gui_t* gui) {
   gui->emu_quit = true;
   pthread_join(gui->emu_thread_id, NULL);
-  destroy_core(&gui->core);
   destroy_debugger(&gui->debugger);
   NFD_Quit();
   ImGui_ImplOpenGL3_Shutdown();
@@ -241,11 +294,12 @@ void destroy_debugger(debugger_t* debugger) {
 }
 
 void open_file(gui_t* gui) {
+  gui->rom_file = "";
 	nfdfilteritem_t filter = { "GameBoy Advance roms", "gba" };
 	nfdresult_t result = NFD_OpenDialog(&gui->rom_file, &filter, 1, "roms/");
 	if(result == NFD_OKAY) {
-    destroy_core(&gui->core);
     init_core(&gui->core);
+    gui->rom_loaded = false;
 		load_rom(&gui->core.mem, gui->rom_file);
     gui->core.running = true;
     gui->rom_loaded = true;
