@@ -8,10 +8,6 @@ endif()
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-
 find_package(glfw3 3.3 REQUIRED)
 find_package(OpenGL REQUIRED)
 add_subdirectory(include/external/nativefiledialog-extended/)
@@ -40,6 +36,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/include/core/cpu/
   ${CMAKE_SOURCE_DIR}/include/core/scheduler/
   ${CMAKE_SOURCE_DIR}/include/external/
+  ${CMAKE_SOURCE_DIR}/include/external/glad/
   ${CMAKE_SOURCE_DIR}/include/external/glad/include/
   ${CMAKE_SOURCE_DIR}/include/external/glad/include/KHR/
   ${CMAKE_SOURCE_DIR}/include/external/glad/include/glad/
@@ -50,7 +47,7 @@ include_directories(
 )
 
 if(WIN32)
-  set(FLAGS -static glfw OpenGL::GL gcc stdc++ winpthread winmm version Imm32 Setupapi)
+  set(FLAGS -static glfw3 OpenGL::GL gcc stdc++ winpthread winmm version Imm32 Setupapi)
 else()
   set(FLAGS pthread glfw OpenGL::GL)
 endif()
@@ -60,7 +57,7 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
   add_compile_definitions(DEBUG)
   #add_link_options(-fsanitize=address)
 elseif(CMAKE_BUILD_TYPE MATCHES Release)
-  add_compile_options(-O2)
+  add_compile_options(-O3)
 endif()
 
 add_executable(${CMAKE_PROJECT_NAME}

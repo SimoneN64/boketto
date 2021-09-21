@@ -11,7 +11,6 @@ void init_mem(mem_t* mem, scheduler_t* scheduler) {
 }
 
 void load_rom(mem_t* mem, const char* path) {
-  
   FILE* fp = fopen(path, "rb");
   if(fp == NULL) {
     logfatal("Failed to open rom %s\n", path);
@@ -35,164 +34,75 @@ void load_rom(mem_t* mem, const char* path) {
 
 static const inline char* region_str(u32 addr) {
   switch(addr) {
-  case 0x00000000 ... 0x00003FFF:
-    return "BIOS";
-  case 0x02000000 ... 0x02FFFFFF:
-    return "eWRAM";
-  case 0x03000000 ... 0x03FFFFFF:
-    return "iWRAM";
-  case 0x04000000 ... 0x040003FE:
-    return "IO";
-  case 0x05000000 ... 0x05FFFFFF:
-    return "PRAM";
-  case 0x06000000 ... 0x06FFFFFF:
-    return "VRAM";
-  case 0x07000000 ... 0x07FFFFFF:
-    return "OAM";
-  case 0x08000000 ... 0x0DFFFFFF:
-    return "ROM";
-  case 0x0E000000 ... 0x0FFFFFFF:
-    return "SRAM";
-  default:
-    return "Open Bus";
+  case 0x00000000 ... 0x00003FFF: return "BIOS";
+  case 0x02000000 ... 0x02FFFFFF: return "eWRAM";
+  case 0x03000000 ... 0x03FFFFFF: return "iWRAM";
+  case 0x04000000 ... 0x040003FE: return "IO";
+  case 0x05000000 ... 0x05FFFFFF: return "PRAM";
+  case 0x06000000 ... 0x06FFFFFF: return "VRAM";
+  case 0x07000000 ... 0x07FFFFFF: return "OAM";
+  case 0x08000000 ... 0x0DFFFFFF: return "ROM";
+  case 0x0E000000 ... 0x0FFFFFFF: return "SRAM";
+  default: return "Open Bus";
   }
 }
 
 u8 read_8(mem_t* mem, u32 pc, u32 addr) {
-  u8 val;
-
   switch(addr) {
-  case 0x00000000 ... 0x00003FFF:
-    val = mem->bios[addr];
-    break;
-  case 0x00004000 ... 0x01FFFFFF:
-    
-    return 0xff;
-  case 0x02000000 ... 0x02FFFFFF:
-    val = mem->eWRAM[addr & EWRAM_DSIZE];
-    break;
-  case 0x03000000 ... 0x03FFFFFF:
-    val = mem->iWRAM[addr & IWRAM_DSIZE];
-    break;
-  case 0x04000000 ... 0x04000058:
-    val = read8_io_ppu(&mem->ppu.io, addr);
-    break;
-  case 0x040000B0 ... 0x040000DF:
-    val = read8_io_dma(mem, addr);
-    break;
-  case 0x04000208:
-    val = mem->ime;
-    break;
-  case 0x05000000 ... 0x05FFFFFF:
-    val = mem->ppu.pram[addr & PRAM_DSIZE];
-    break;
-  case 0x06000000 ... 0x06FFFFFF:
-    val = mem->ppu.vram[addr & VRAM_DSIZE];
-    break;
-  case 0x07000000 ... 0x07FFFFFF:
-    val = mem->ppu.oam[addr & OAM_DSIZE];
-    break;
-  case 0x08000000 ... 0x0DFFFFFF:
-    val = mem->rom[addr & (mem->rom_size - 1)];
-    break;
-  default:
-    logfatal("[ERR ][MEM] Read from unhandled %s! (%08X) (PC: %08X)\n", region_str(addr), addr, pc);
+  case 0x00000000 ... 0x00003FFF: return mem->bios[addr];    
+  case 0x00004000 ... 0x01FFFFFF: return 0xff;
+  case 0x02000000 ... 0x02FFFFFF: return mem->eWRAM[addr & EWRAM_DSIZE];    
+  case 0x03000000 ... 0x03FFFFFF: return mem->iWRAM[addr & IWRAM_DSIZE];    
+  case 0x04000000 ... 0x04000058: return read8_io_ppu(&mem->ppu.io, addr);    
+  case 0x040000B0 ... 0x040000DF: return read8_io_dma(mem, addr);    
+  case 0x04000208: return mem->ime;    
+  case 0x05000000 ... 0x05FFFFFF: return mem->ppu.pram[addr & PRAM_DSIZE];    
+  case 0x06000000 ... 0x06FFFFFF: return mem->ppu.vram[addr & VRAM_DSIZE];    
+  case 0x07000000 ... 0x07FFFFFF: return mem->ppu.oam[addr & OAM_DSIZE];    
+  case 0x08000000 ... 0x0DFFFFFF: return mem->rom[addr & (mem->rom_size - 1)];    
+  default: break;
+//    logfatal("[ERR][MEM] Read8 from unhandled %s! (%08X) (PC: %08X)\n", region_str(addr), addr, pc);
   }
-
-  
-  return val;
 }
 
 u16 read_16(mem_t* mem, u32 pc, u32 addr) {
-  u16 val;
   assert((addr & 1) == 0);
 
   switch(addr) {
-  case 0x00000000 ... 0x00003FFF:
-    val = *(u16*)&mem->bios[addr];
-    break;
-  case 0x00004000 ... 0x01FFFFFF:
-    
-    return 0xffff;
-  case 0x02000000 ... 0x02FFFFFF:
-    val = *(u16*)&mem->eWRAM[addr & EWRAM_DSIZE];
-    break;
-  case 0x03000000 ... 0x03FFFFFF:
-    val = *(u16*)&mem->iWRAM[addr & IWRAM_DSIZE];
-    break;
-  case 0x04000000 ... 0x04000058:
-    val = read16_io_ppu(&mem->ppu.io, addr);
-    break;
-  case 0x040000B0 ... 0x040000DF:
-    val = read16_io_dma(mem, addr);
-    break;
-  case 0x04000208:
-    val = mem->ime;
-    break;
-  case 0x05000000 ... 0x05FFFFFF:
-    val = *(u16*)&mem->ppu.pram[addr & PRAM_DSIZE];
-    break;
-  case 0x06000000 ... 0x06FFFFFF:
-    val = *(u16*)&mem->ppu.vram[addr & VRAM_DSIZE];
-    break;
-  case 0x07000000 ... 0x07FFFFFF:
-    val = *(u16*)&mem->ppu.oam[addr & OAM_DSIZE];
-    break;
-  case 0x08000000 ... 0x0DFFFFFF:
-    val = *(u16*)&mem->rom[addr & (mem->rom_size - 1)];
-    break;
-  default:
-    logfatal("[ERR ][MEM] Read from unhandled %s! (%08X) (PC: %08X)\n", region_str(addr), addr, pc);
+  case 0x00000000 ... 0x00003FFF: return *(u16*)&mem->bios[addr];    
+  case 0x00004000 ... 0x01FFFFFF: return 0xffff;
+  case 0x02000000 ... 0x02FFFFFF: return *(u16*)&mem->eWRAM[addr & EWRAM_DSIZE];    
+  case 0x03000000 ... 0x03FFFFFF: return *(u16*)&mem->iWRAM[addr & IWRAM_DSIZE];    
+  case 0x04000000 ... 0x04000058: return read16_io_ppu(&mem->ppu.io, addr);    
+  case 0x040000B0 ... 0x040000DF: return read16_io_dma(mem, addr);
+  case 0x04000208: return mem->ime;
+  case 0x05000000 ... 0x05FFFFFF: return *(u16*)&mem->ppu.pram[addr & PRAM_DSIZE];
+  case 0x06000000 ... 0x06FFFFFF: return *(u16*)&mem->ppu.vram[addr & VRAM_DSIZE];
+  case 0x07000000 ... 0x07FFFFFF: return *(u16*)&mem->ppu.oam[addr & OAM_DSIZE]; 
+  case 0x08000000 ... 0x0DFFFFFF: return *(u16*)&mem->rom[addr & (mem->rom_size - 1)];
+  default: break;
+//    logfatal("[ERR][MEM] Read16 from unhandled %s! (%08X) (PC: %08X)\n", region_str(addr), addr, pc);
   }
-
-  
-  return val;
 }
 
 u32 read_32(mem_t* mem, u32 pc, u32 addr) {
-  u32 val;
   assert((addr & 3) == 0);
 
   switch(addr) {
-  case 0x00000000 ... 0x00003FFF:
-    val = *(u32*)&mem->bios[addr];
-    break;
-  case 0x00004000 ... 0x01FFFFFF:
-    
-    return 0xffffffff;
-  case 0x02000000 ... 0x02FFFFFF:
-    val = *(u32*)&mem->eWRAM[addr & EWRAM_DSIZE];
-    break;
-  case 0x03000000 ... 0x03FFFFFF:
-    val = *(u32*)&mem->iWRAM[addr & IWRAM_DSIZE];
-    break;
-  case 0x04000000 ... 0x04000058:
-    val = read32_io_ppu(&mem->ppu.io, addr);
-    break;
-  case 0x040000B0 ... 0x040000DF:
-    val = read32_io_dma(mem, addr);
-    break;
-  case 0x04000208:
-    val = mem->ime;
-    break;
-  case 0x05000000 ... 0x05FFFFFF:
-    val = *(u32*)&mem->ppu.pram[addr & PRAM_DSIZE];
-    break;
-  case 0x06000000 ... 0x06FFFFFF:
-    val = *(u32*)&mem->ppu.vram[addr & VRAM_DSIZE];
-    break;
-  case 0x07000000 ... 0x07FFFFFF:
-    val = *(u32*)&mem->ppu.oam[addr & OAM_DSIZE];
-    break;
-  case 0x08000000 ... 0x0DFFFFFF:
-    val = *(u32*)&mem->rom[addr & (mem->rom_size - 1)];
-    break;
-  default:
-    logfatal("[WARN][MEM] Read from unhandled %s! (%08X) (PC: %08X)\n", region_str(addr), addr, pc);
+  case 0x00000000 ... 0x00003FFF: return *(u32*)&mem->bios[addr];
+  case 0x00004000 ... 0x01FFFFFF: return 0xffffffff;
+  case 0x02000000 ... 0x02FFFFFF: return *(u32*)&mem->eWRAM[addr & EWRAM_DSIZE];
+  case 0x03000000 ... 0x03FFFFFF: return *(u32*)&mem->iWRAM[addr & IWRAM_DSIZE];
+  case 0x04000000 ... 0x04000058: return read32_io_ppu(&mem->ppu.io, addr);
+  case 0x040000B0 ... 0x040000DF: return read32_io_dma(mem, addr);
+  case 0x04000208: return mem->ime;
+  case 0x05000000 ... 0x05FFFFFF: return *(u32*)&mem->ppu.pram[addr & PRAM_DSIZE];
+  case 0x06000000 ... 0x06FFFFFF: return *(u32*)&mem->ppu.vram[addr & VRAM_DSIZE];
+  case 0x07000000 ... 0x07FFFFFF: return *(u32*)&mem->ppu.oam[addr & OAM_DSIZE];
+  case 0x08000000 ... 0x0DFFFFFF: return *(u32*)&mem->rom[addr & (mem->rom_size - 1)];
+  default: break;
+//    logfatal("[ERR][MEM] Read32 from unhandled %s! (%08X) (PC: %08X)\n", region_str(addr), addr, pc);
   }
-
-  
-  return val;
 }
 
 void write_8(mem_t* mem, u32 pc, u32 addr, u8 val) {
@@ -221,10 +131,9 @@ void write_8(mem_t* mem, u32 pc, u32 addr, u8 val) {
   case 0x07000000 ... 0x07FFFFFF:
     mem->ppu.oam[addr & OAM_DSIZE] = val;
     break;
-  default:
-    logfatal("[ERR ][MEM] Write (%02X) to unhandled %s (%08X) (PC: %08X)!\n", val, region_str(addr), addr, pc);
+  default: break;
+//    logfatal("[ERR][MEM] Write8 (%02X) to unhandled %s (%08X) (PC: %08X)!\n", val, region_str(addr), addr, pc);
   }
-  
 }
 
 void write_16(mem_t* mem, u32 pc, u32 addr, u16 val) {
@@ -257,11 +166,9 @@ void write_16(mem_t* mem, u32 pc, u32 addr, u16 val) {
   case 0x07000000 ... 0x07FFFFFF:
     *(u16*)&mem->ppu.oam[addr & OAM_DSIZE] = val;
     break;
-  default:
-    logfatal("[ERR ][MEM] Write (%04X) to unhandled %s (%08X) (PC: %08X)!\n", val, region_str(addr), addr, pc);
+  default: break;
+//    logfatal("[ERR][MEM] Write16 (%04X) to unhandled %s (%08X) (PC: %08X)!\n", val, region_str(addr), addr, pc);
   }
-
-  
 }
 
 void write_32(mem_t* mem, u32 pc, u32 addr, u32 val) {
@@ -294,8 +201,7 @@ void write_32(mem_t* mem, u32 pc, u32 addr, u32 val) {
   case 0x07000000 ... 0x07FFFFFF:
     *(u32*)&mem->ppu.oam[addr & OAM_DSIZE] = val;
     break;
-  default:
-    logfatal("[WARN][MEM] Write (%08X) to unhandled %s (%08X) (PC: %08X)!\n", val, region_str(addr), addr, pc);
-  }
-  
+  default: break;
+//    logfatal("[ERR][MEM] Write32 (%08X) to unhandled %s (%08X) (PC: %08X)!\n", val, region_str(addr), addr, pc);
+  } 
 }

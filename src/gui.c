@@ -1,6 +1,7 @@
 #include <capstone/capstone.h>
 #include <core.h>
 #include <gui.h>
+#include <math.h>
 #include <log.h>
 
 static void glfw_error_callback(int error, const char* description) {
@@ -24,6 +25,8 @@ void init_gui(gui_t* gui, const char* title) {
 	if(glfwInit() == GLFW_FALSE) {
     logfatal("Couldn't initialize GLFW\n");
   }
+
+  memset(gui->debugger.bgs[0], 0, DEPTH * GBA_W * GBA_H);
 
   gui->rom_loaded = false;
 
@@ -71,16 +74,10 @@ void init_gui(gui_t* gui, const char* title) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
-  for(int i = 0; i < VRAM_SIZE; i += 2) {
-    u16 raw = gui->core.mem.ppu.vram[i];
-    gui->debugger.converted_vram[i >> 1] = (color5_to_8(raw) << 24) | (color5_to_8(raw >> 5) << 16)
-                                         | (color5_to_8(raw >> 10) << 8) | 0xff;
-  }
   
-  glGenTextures(1, &gui->debugger.id);
-  glBindTexture(GL_TEXTURE_2D, gui->debugger.id);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, VRAM_W, VRAM_H, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, gui->debugger.converted_vram);
+  glGenTextures(1, &gui->debugger.bg1id);
+  glBindTexture(GL_TEXTURE_2D, gui->debugger.bg1id);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GBA_W, GBA_H, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, gui->debugger.bgs[0]);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -123,14 +120,14 @@ void update_texture(gui_t* gui) {
   glBindTexture(GL_TEXTURE_2D, gui->id);
   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, GBA_W, GBA_H, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, framebuffer);
 
-  for(int i = 0; i < VRAM_SIZE; i += 2) {
-    u16 raw = *(u16*)&gui->core.mem.ppu.vram[i];
-    gui->debugger.converted_vram[i >> 1] = (color5_to_8(raw) << 24) | (color5_to_8(raw >> 5) << 16)
-                                         | (color5_to_8(raw >> 10) << 8) | 0xff;
+  for(int i = 0; i < GBA_W * GBA_H; i++) {
+    u16 raw = *(u16*)&gui->core.mem.ppu.vram[i << 1];
+    gui->debugger.bgs[0][i] = (color5_to_8(raw) << 24) | (color5_to_8(raw >> 5) << 16)
+                            | (color5_to_8(raw >> 10) << 8) | 0xff;
   }
 
-  glBindTexture(GL_TEXTURE_2D, gui->debugger.id);
-  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, VRAM_W, VRAM_H, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, gui->debugger.converted_vram);
+  glBindTexture(GL_TEXTURE_2D, gui->debugger.bg1id);
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, GBA_W, GBA_H, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, gui->debugger.bgs[0]);
 }
 
 void main_menubar(gui_t *gui) {
@@ -160,9 +157,11 @@ void main_menubar(gui_t *gui) {
 }
 
 void disassembly(gui_t *gui) {
-  u32 instructions[25];
+  u32 instructions[25] = {};
   u32 pc = gui->core.cpu.regs.gpr[PC];
   u32 pointer = pc - (14 * 4);
+  pointer -= (pointer & 3); // align the pointer
+
   if(gui->rom_loaded) {
     for(int i = 0; i < 25; i++) {
       instructions[i] = read_32(&gui->core.mem, pointer + i * 4, pointer + i * 4);
@@ -228,8 +227,8 @@ void registers_view(gui_t *gui) {
 
 void vram_view(gui_t* gui) {
   igBegin("VRAM view", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-  ImVec2 vram_size = {.x = VRAM_W * 1.5, .y = VRAM_H * 1.5};
-  igImage((ImTextureID)((intptr_t)gui->debugger.id), vram_size, ZERO, ONE, FULL4, ZERO4);
+  ImVec2 vram_size = {.x = GBA_W * 1.5, .y = GBA_H * 1.5};
+  igImage((ImTextureID)((intptr_t)gui->debugger.bg1id), vram_size, ZERO, ONE, FULL4, ZERO4);
   igEnd();
 }
 

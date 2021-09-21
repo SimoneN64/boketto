@@ -19,9 +19,9 @@ static const ImVec2 MAX = {.x = __FLT_MAX__, .y = __FLT_MAX__};
 static const ImVec4 ZERO4 = {.x = 0, .y = 0, .z = 0, .w = 0};
 static const ImVec4 FULL4 = {.x = 1, .y = 1, .z = 1, .w = 1};
 
-static const ImVec4 colors_disasm[3] = {{.x = 1, .y = 0.000, .z = 0, .w = 1}, 
-                                        {.x = 1, .y = 0.619, .z = 0, .w = 1}, 
-                                        {.x = 1, .y = 0.988, .z = 0, .w = 1}};
+static const ImVec4 colors_disasm[3] = {{.x = 1, .y = 0.000, .z = 0, .w = 1},  // RED
+                                        {.x = 1, .y = 0.619, .z = 0, .w = 1},  // ORANGE
+                                        {.x = 1, .y = 0.988, .z = 0, .w = 1}}; // YELLOW
 
 static const char* mode_str[32] = {
   [0] = "", [16] = "User", "FIQ", "IRQ", "Supervisor", [23] = "Abort", [27] = "Undefined", [31] = "System"
@@ -32,8 +32,8 @@ typedef struct {
   csh handle;
   cs_insn* insn;
   size_t count;
-  unsigned int id; // OpenGL framebuffer texture ID
-  u32 converted_vram[VRAM_SIZE];
+  unsigned int bg1id, bg2id, bg3id, bg4id; // OpenGL framebuffer texture IDs
+  u32 bgs[4][GBA_W * GBA_H];
 } debugger_t;
 
 typedef struct {

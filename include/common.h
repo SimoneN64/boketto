@@ -21,8 +21,6 @@
 
 #define GBA_W 240
 #define GBA_H 160
-#define VRAM_W 256
-#define VRAM_H 192
 
 typedef  uint8_t u8;
 typedef uint16_t u16;

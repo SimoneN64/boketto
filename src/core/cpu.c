@@ -13,11 +13,8 @@ void step_cpu(cpu_t* cpu, mem_t* mem) {
     (cpu->thumb_lut[cpu->regs.instruction >> 6])(&cpu->regs, mem);
   } else {
     cpu->regs.instruction = fetch_32(&cpu->regs, mem);
-    if(get_condition(cpu->regs.cpsr, cpu->regs.instruction >> 28)) {
-      
+    if(get_condition(cpu->regs.cpsr, cpu->regs.instruction >> 28)) {      
       (cpu->arm_lut[((cpu->regs.instruction >> 16) & 0xFF0) | ((cpu->regs.instruction >> 4) & 0xF)])(&cpu->regs, mem);
-    } else {
-      
     }
   }
 }
