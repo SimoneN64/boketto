@@ -8,5 +8,6 @@ roms/
 *.log
 .cache/
 vgcore.*
+*.sh
 .vscode/
 *.dump

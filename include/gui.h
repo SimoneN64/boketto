@@ -12,6 +12,7 @@
 #include <core.h>
 #include <stdatomic.h>
 #include <capstone/capstone.h>
+#include <nfd.h>
 
 static const ImVec2 ZERO = {.x = 0, .y = 0};
 static const ImVec2 ONE = {.x = 1, .y = 1};

@@ -48,10 +48,10 @@ void init_gui(gui_t* gui, const char* title) {
     logfatal("Failed to initialize OpenGL loader!\n");
   }
 
-  ImFontAtlas* opensans_font_atlas = ImFontAtlas_ImFontAtlas();
-  ImFont* opensans_font = ImFontAtlas_AddFontFromFileTTF(opensans_font_atlas, "resources/FiraCode-VariableFont_wght.ttf", 16, NULL, NULL);
+  ImFontAtlas* firacode_font_atlas = ImFontAtlas_ImFontAtlas();
+  ImFont* firacode_font = ImFontAtlas_AddFontFromFileTTF(firacode_font_atlas, "resources/FiraCode-VariableFont_wght.ttf", 16, NULL, NULL);
 
-  gui->ctx = igCreateContext(opensans_font_atlas);
+  gui->ctx = igCreateContext(firacode_font_atlas);
   gui->io = igGetIO();
 
   ImGui_ImplGlfw_InitForOpenGL(gui->window, true);
