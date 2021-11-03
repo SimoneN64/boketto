@@ -17,7 +17,7 @@
 #define VRAM_DSIZE 0x1FFFF
 #define PRAM_DSIZE (PRAM_SIZE - 1)
 #define OAM_DSIZE (OAM_SIZE - 1)
-#define DEPTH 4
+#define DEPTH 2
 
 #define GBA_W 240
 #define GBA_H 160

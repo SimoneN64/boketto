@@ -1,18 +1,10 @@
-#include <capstone/capstone.h>
+#include <capstone.h>
 #include <core.h>
 #include <gui.h>
 #include <math.h>
 #include <log.h>
 
-static void glfw_error_callback(int error, const char* description) {
-  logfatal("Glfw Error %d: %s\n", error, description);
-}
-
-static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-  glViewport(0, 0, width, height);
-}
-
-void* core_cb(void* vpargs) {
+void* core_callback(void* vpargs) {
   gui_t* gui = (gui_t*)vpargs;
   while(!atomic_load(&gui->emu_quit)) {
     run_frame(&gui->core);
@@ -22,31 +14,34 @@ void* core_cb(void* vpargs) {
 }
 
 void init_gui(gui_t* gui, const char* title) {
-	if(glfwInit() == GLFW_FALSE) {
-    logfatal("Couldn't initialize GLFW\n");
-  }
+  init_core(&gui->core);
+  init_disasm(&gui->debugger);
 
-  memset(gui->debugger.bgs[0], 0, DEPTH * GBA_W * GBA_H);
+	if(SDL_Init(SDL_INIT_VIDEO) != 0) {
+    logfatal("Error: %s\n", SDL_GetError());
+  }
 
   gui->rom_loaded = false;
+  gui->running = true;
 
   const char* glsl_version = "#version 330";
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwSetErrorCallback(glfw_error_callback);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+  
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+  SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
-  const GLFWvidmode *details = glfwGetVideoMode(glfwGetPrimaryMonitor());
-  int w = details->width - (details->width / 4), h = details->height - (details->height / 4);
-  gui->window = glfwCreateWindow(w, h, title, NULL, NULL);
-  glfwSetWindowPos(gui->window, details->width / 2 - w / 2, details->height / 2 - h / 2);
-  glfwSetFramebufferSizeCallback(gui->window, framebuffer_size_callback);
-
-  glfwMakeContextCurrent(gui->window);
-  glfwSwapInterval(0);
-
-  if(!gladLoadGL()) {
-    logfatal("Failed to initialize OpenGL loader!\n");
-  }
+  SDL_DisplayMode details;
+  SDL_GetCurrentDisplayMode(0, &details);
+  
+  int w = details.w - (details.w / 4), h = details.h - (details.h / 4);
+  
+  gui->window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI);
+  gui->gl_context = SDL_GL_CreateContext(gui->window);
+  SDL_GL_MakeCurrent(gui->window, gui->gl_context);
 
   ImFontAtlas* firacode_font_atlas = ImFontAtlas_ImFontAtlas();
   ImFont* firacode_font = ImFontAtlas_AddFontFromFileTTF(firacode_font_atlas, "resources/FiraCode-VariableFont_wght.ttf", 16, NULL, NULL);
@@ -54,30 +49,19 @@ void init_gui(gui_t* gui, const char* title) {
   gui->ctx = igCreateContext(firacode_font_atlas);
   gui->io = igGetIO();
 
-  ImGui_ImplGlfw_InitForOpenGL(gui->window, true);
+  ImGui_ImplSDL2_InitForOpenGL(gui->window, gui->gl_context);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   ImGuiStyle* style = igGetStyle();
   style->WindowRounding = 10.0;
   igStyleColorsDark(NULL);
-  
-  init_core(&gui->core);
-  init_debugger(&gui->debugger, &gui->core);
 
   uint8_t current_framebuffer = gui->core.mem.ppu.current_framebuffer ^ 1;
-  u32* framebuffer = gui->core.mem.ppu.framebuffers[current_framebuffer];
+  u16* framebuffer = gui->core.mem.ppu.framebuffers[current_framebuffer];
   
   glGenTextures(1, &gui->id);
   glBindTexture(GL_TEXTURE_2D, gui->id);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GBA_W, GBA_H, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, framebuffer);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-  
-  glGenTextures(1, &gui->debugger.bg1id);
-  glBindTexture(GL_TEXTURE_2D, gui->debugger.bg1id);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GBA_W, GBA_H, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, gui->debugger.bgs[0]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GBA_W, GBA_H, 0, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1, framebuffer);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -85,14 +69,7 @@ void init_gui(gui_t* gui, const char* title) {
 
 	NFD_Init();
 
-  pthread_create(&gui->emu_thread_id, NULL, core_cb, (void*)gui);
-}
-
-void init_debugger(debugger_t* debugger, core_t* core) {
-  debugger->core = core;
-  if(cs_open(CS_ARCH_ARM, CS_MODE_ARM | CS_MODE_LITTLE_ENDIAN, &debugger->handle) != CS_ERR_OK) {
-    logfatal("Could not initialize capstone\n");
-  }
+  pthread_create(&gui->emu_thread_id, NULL, core_callback, (void*)gui);
 }
 
 ImVec2 image_size;
@@ -113,21 +90,71 @@ static void resize_callback(ImGuiSizeCallbackData* data) {
   image_size.y = y;
 }
 
+void main_loop(gui_t* gui) {
+  ImGuiIO* io = igGetIO();
+  ImVec4 clear_color = {0.45f, 0.55f, 0.60f, 1.00f};
+  while (gui->running) {
+    update_texture(gui);
+    
+    SDL_Event event;
+    while(SDL_PollEvent(&event)) {
+      ImGui_ImplSDL2_ProcessEvent(&event);
+
+      switch(event.type) {
+        case SDL_QUIT: gui->running = false; break;
+        case SDL_WINDOWEVENT:
+          if(event.window.event == SDL_WINDOWEVENT_CLOSE) {
+            gui->running = false;
+          }
+          break;  
+        case SDL_KEYDOWN:
+          switch(event.key.keysym.sym) {
+            case SDLK_o: open_file(gui); break;
+            case SDLK_p:
+              if(gui->rom_loaded) {
+                gui->core.running = !gui->core.running;
+              }
+              break;
+            case SDLK_ESCAPE: gui->running = false; break;
+          }
+          break;
+      }
+    }
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    igNewFrame();
+    
+    main_menubar(gui);
+    debugger_window(gui);
+    
+    igSetNextWindowSizeConstraints(ZERO, MAX, resize_callback, NULL);
+    igBegin("Display", NULL, ImGuiWindowFlags_NoTitleBar);
+    ImVec2 window_size;
+    igGetWindowSize(&window_size);
+    ImVec2 result = {.x = (window_size.x - image_size.x) * 0.5, .y = (window_size.y - image_size.y) * 0.5};
+    igSetCursorPos(result);
+    igImage((ImTextureID)((intptr_t)gui->id), image_size, ZERO, ONE, FULL4, ZERO4);
+    igEnd();
+    
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+    
+    igRender();
+    glViewport(0, 0, (int)io->DisplaySize.x, (int)io->DisplaySize.y);
+    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+    glClear(GL_COLOR_BUFFER_BIT);
+    ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());
+    SDL_GL_SwapWindow(gui->window);
+  }
+}
+
 void update_texture(gui_t* gui) {
   u8 current_framebuffer = atomic_load(&gui->core.mem.ppu.current_framebuffer) ^ 1;
-  u32* framebuffer = gui->core.mem.ppu.framebuffers[current_framebuffer];
+  u16* framebuffer = gui->core.mem.ppu.framebuffers[current_framebuffer];
 
   glBindTexture(GL_TEXTURE_2D, gui->id);
-  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, GBA_W, GBA_H, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, framebuffer);
-
-  for(int i = 0; i < GBA_W * GBA_H; i++) {
-    u16 raw = *(u16*)&gui->core.mem.ppu.vram[i << 1];
-    gui->debugger.bgs[0][i] = (color5_to_8(raw) << 24) | (color5_to_8(raw >> 5) << 16)
-                            | (color5_to_8(raw >> 10) << 8) | 0xff;
-  }
-
-  glBindTexture(GL_TEXTURE_2D, gui->debugger.bg1id);
-  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, GBA_W, GBA_H, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, gui->debugger.bgs[0]);
+  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, GBA_W, GBA_H, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1, framebuffer);
 }
 
 void main_menubar(gui_t *gui) {
@@ -137,18 +164,24 @@ void main_menubar(gui_t *gui) {
         open_file(gui);
       }
       if(igMenuItem_Bool("Exit", "Esc", false, true)) {
-        glfwSetWindowShouldClose(gui->window, GLFW_TRUE);
+        gui->running = false;
       }
       igEndMenu();
     }
     if(igBeginMenu("Emulation", true)) {
-      if(igMenuItem_Bool(gui->core.running ? "Pause" : "Resume", "P", false, gui->rom_loaded)) {
+      char* pause_text = "Pause";
+      if(!gui->core.running && gui->rom_loaded) {
+        pause_text = "Resume";
+      }
+
+      if(igMenuItem_Bool(pause_text, "P", false, gui->rom_loaded)) {
         gui->core.running = !gui->core.running;
       }
       if(igMenuItem_Bool("Stop", NULL, false, gui->rom_loaded)) {
-        init_core(&gui->core);
-        gui->rom_loaded = false;
-        gui->rom_file = "";
+        stop(gui);
+      }
+      if(igMenuItem_Bool("Reset", NULL, false, gui->rom_loaded)) {
+        reset(gui);
       }
       igEndMenu();
     }
@@ -225,71 +258,22 @@ void registers_view(gui_t *gui) {
   igEnd();
 }
 
-void vram_view(gui_t* gui) {
-  igBegin("VRAM view", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-  ImVec2 vram_size = {.x = GBA_W * 1.5, .y = GBA_H * 1.5};
-  igImage((ImTextureID)((intptr_t)gui->debugger.bg1id), vram_size, ZERO, ONE, FULL4, ZERO4);
-  igEnd();
-}
-
 void debugger_window(gui_t* gui) {
   disassembly(gui);
   registers_view(gui);
-  vram_view(gui);
-}
-
-void main_loop(gui_t* gui) {
-  while (!glfwWindowShouldClose(gui->window)) {
-    update_texture(gui);
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    igNewFrame();
-
-    if (glfwGetKey(gui->window, GLFW_KEY_O) == GLFW_PRESS) {
-      open_file(gui);
-    } else if (glfwGetKey(gui->window, GLFW_KEY_P) == GLFW_PRESS && gui->rom_loaded) {
-      gui->core.running = !gui->core.running;
-    } else if (glfwGetKey(gui->window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-      glfwSetWindowShouldClose(gui->window, GLFW_TRUE);
-    }
-    
-    main_menubar(gui);
-    debugger_window(gui);
-    
-    igSetNextWindowSizeConstraints(ZERO, MAX, resize_callback, NULL);
-    igBegin("Display", NULL, ImGuiWindowFlags_NoTitleBar);
-    ImVec2 window_size;
-    igGetWindowSize(&window_size);
-    ImVec2 result = {.x = (window_size.x - image_size.x) * 0.5, .y = (window_size.y - image_size.y) * 0.5};
-    igSetCursorPos(result);
-    igImage((ImTextureID)((intptr_t)gui->id), image_size, ZERO, ONE, FULL4, ZERO4);
-    igEnd();
-    
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClearColor(0.227, 0.345, 0.454, 1.00);
-    
-    igRender();
-    ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());
-
-    glfwSwapBuffers(gui->window);
-    glfwPollEvents();
-  }
 }
 
 void destroy_gui(gui_t* gui) {
   gui->emu_quit = true;
   pthread_join(gui->emu_thread_id, NULL);
-  destroy_debugger(&gui->debugger);
+  destroy_disasm(&gui->debugger);
   NFD_Quit();
   ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
+  ImGui_ImplSDL2_Shutdown();
   igDestroyContext(gui->ctx);
-  glfwDestroyWindow(gui->window);
-}
-
-void destroy_debugger(debugger_t* debugger) {
-  cs_close(&debugger->handle);
+  SDL_GL_DeleteContext(gui->gl_context);
+  SDL_DestroyWindow(gui->window);
+  SDL_Quit();
 }
 
 void open_file(gui_t* gui) {
@@ -297,11 +281,28 @@ void open_file(gui_t* gui) {
 	nfdfilteritem_t filter = { "GameBoy Advance roms", "gba" };
 	nfdresult_t result = NFD_OpenDialog(&gui->rom_file, &filter, 1, "roms/");
 	if(result == NFD_OKAY) {
-    init_core(&gui->core);
-    gui->rom_loaded = false;
-		load_rom(&gui->core.mem, gui->rom_file);
-    gui->core.running = true;
-    gui->rom_loaded = true;
-    flush_pipe_32(&gui->core.cpu.regs, &gui->core.mem);
+    reset(gui);
 	}
+}
+
+void start(gui_t* gui) {
+  gui->rom_loaded = load_rom(&gui->core.mem, gui->rom_file);
+  gui->emu_quit = !gui->rom_loaded;
+  gui->core.running = gui->rom_loaded;
+  if(gui->rom_loaded) {
+    pthread_create(&gui->emu_thread_id, NULL, core_callback, (void*)gui);
+  }
+}
+
+void reset(gui_t* gui) {
+  stop(gui);
+  start(gui);
+}
+
+void stop(gui_t* gui) {
+  gui->emu_quit = true;
+  pthread_join(gui->emu_thread_id, NULL);
+  init_core(&gui->core);
+  gui->rom_loaded = false;
+  gui->core.running = false;
 }

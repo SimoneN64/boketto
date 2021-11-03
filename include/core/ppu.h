@@ -10,7 +10,7 @@ typedef struct {
   u8 oam[OAM_SIZE];
   ppu_io_t io;
   atomic_uint_fast8_t current_framebuffer;
-  u32 framebuffers[2][GBA_W * GBA_H];
+  u16 framebuffers[2][GBA_W * GBA_H];
   bool frame_finished;
 } ppu_t;
 

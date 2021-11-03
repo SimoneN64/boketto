@@ -1,18 +1,15 @@
 #pragma once
-#include <glad.h>
-#ifdef _WIN32
-#include <glfw/glfw3.h>
-#else
-#include <GLFW/glfw3.h>
-#endif
+#define SDL_MAIN_HANDLED
+#include <SDL.h>
+#include <SDL_opengl.h>
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #include <cimgui.h>
 #include <cimgui_impl.h>
 #include <pthread.h>
 #include <core.h>
 #include <stdatomic.h>
-#include <capstone/capstone.h>
 #include <nfd.h>
+#include <disasm.h>
 
 static const ImVec2 ZERO = {.x = 0, .y = 0};
 static const ImVec2 ONE = {.x = 1, .y = 1};
@@ -29,36 +26,28 @@ static const char* mode_str[32] = {
 };
 
 typedef struct {
-  core_t* core;
-  csh handle;
-  cs_insn* insn;
-  size_t count;
-  unsigned int bg1id, bg2id, bg3id, bg4id; // OpenGL framebuffer texture IDs
-  u32 bgs[4][GBA_W * GBA_H];
-} debugger_t;
-
-typedef struct {
   ImGuiContext* ctx;
   ImGuiIO* io;
-	GLFWwindow* window;
+	SDL_Window* window;
   unsigned int id; // OpenGL framebuffer texture ID
 	nfdchar_t* rom_file;
-  bool rom_loaded;
-  core_t core;
-  atomic_bool emu_quit; 
+  bool rom_loaded, running;
+  SDL_GLContext gl_context;
   pthread_t emu_thread_id;
-  debugger_t debugger;
+  atomic_bool emu_quit; 
+  core_t core;
+  disasm_t debugger;
 } gui_t;
 
-void init_debugger(debugger_t* debugger, core_t* core);
-void destroy_debugger(debugger_t* debugger);
 void init_gui(gui_t* gui, const char* title);
 void main_loop(gui_t* gui);
 void destroy_gui(gui_t* gui);
 void open_file(gui_t* gui);
-void update_texture(gui_t* gui);
 void main_menubar(gui_t* gui);
 void debugger_window(gui_t* gui);
 void disassembly(gui_t* gui);
 void registers_view(gui_t* gui);
-void vram_view(gui_t* gui);
+void update_texture(gui_t* gui);
+void reset(gui_t* gui);
+void stop(gui_t* gui);
+void start(gui_t* gui);

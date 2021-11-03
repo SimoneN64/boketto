@@ -61,24 +61,26 @@ void hblank_dispatch(ppu_t* ppu, const u64 time, scheduler_t* scheduler) {
 }
 
 void mode3(ppu_t* ppu) {
-  u32* framebuffer = ppu->framebuffers[ppu->current_framebuffer];
+  u16* framebuffer = ppu->framebuffers[ppu->current_framebuffer];
   u32 bufferIndex = ppu->io.vcount * GBA_W;
-  for(int x = 0; x < GBA_W; x++) { 
-    u16 raw_color = *(u16*)&ppu->vram[bufferIndex << 1];
-    framebuffer[bufferIndex] = (color5_to_8(raw_color & 0x1F) << 24) | (color5_to_8((raw_color >> 5) & 0x1F) << 16)
-                             | (color5_to_8((raw_color >> 10) & 0x1F) << 8) | 0xff;
-    ++bufferIndex;
-  }
+  memcpy(&framebuffer[bufferIndex], &ppu->vram[bufferIndex << 1], GBA_W);
+  // for(int x = 0; x < GBA_W; x++) { 
+  //   u16 raw_color = *(u16*)&ppu->vram[bufferIndex << 1];
+  //   framebuffer[bufferIndex] = (color5_to_8(raw_color & 0x1F) << 24) | (color5_to_8((raw_color >> 5) & 0x1F) << 16)
+  //                            | (color5_to_8((raw_color >> 10) & 0x1F) << 8) | 0xff;
+  //   ++bufferIndex;
+  // }
 }
 
 void mode4(ppu_t* ppu) {
-  u32* framebuffer = ppu->framebuffers[ppu->current_framebuffer];
+  u16* framebuffer = ppu->framebuffers[ppu->current_framebuffer];
   u32 bufferIndex = ppu->io.vcount * GBA_W;
   for(int x = 0; x < GBA_W; x++) {
     const u32 paletteIndex = ppu->vram[bufferIndex];
-    u16 raw_color = *(u16*)&ppu->pram[paletteIndex << 1];
-    framebuffer[bufferIndex] = (color5_to_8(raw_color) << 24) | (color5_to_8(raw_color >> 5) << 16)
-                             | (color5_to_8(raw_color >> 10) << 8) | 0xff;
+    //u16 raw_color = *(u16*)&ppu->pram[paletteIndex << 1];
+    //framebuffer[bufferIndex] = (color5_to_8(raw_color) << 24) | (color5_to_8(raw_color >> 5) << 16)
+    //                         | (color5_to_8(raw_color >> 10) << 8) | 0xff;
+    framebuffer[bufferIndex] = *(u16*)&ppu->pram[paletteIndex << 1];
     ++bufferIndex;
   }
 }

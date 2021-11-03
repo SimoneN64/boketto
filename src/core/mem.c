@@ -10,10 +10,11 @@ void init_mem(mem_t* mem, scheduler_t* scheduler) {
   init_dma(&mem->dmac);
 }
 
-void load_rom(mem_t* mem, const char* path) {
+bool load_rom(mem_t* mem, const char* path) {
   FILE* fp = fopen(path, "rb");
   if(fp == NULL) {
-    logfatal("Failed to open rom %s\n", path);
+    printf("Failed to open rom %s\n", path);
+    return false;
   }
 
   fseek(fp, 0, SEEK_END);
@@ -25,11 +26,14 @@ void load_rom(mem_t* mem, const char* path) {
 
   mem->rom = (u8*)malloc(rounded_rom_size);
   if(fread(mem->rom, 1, rom_size, fp) != rom_size) {
-    logfatal("Failed to load rom\n");
+    printf("Failed to load rom\n");
+    return false;
   }
+  
   memset(&mem->rom[rom_size], 0, rounded_rom_size - rom_size);
 
   fclose(fp);
+  return true;
 }
 
 static const inline char* region_str(u32 addr) {

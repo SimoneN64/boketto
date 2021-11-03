@@ -1,5 +1,6 @@
-#include "register.h"
-#include "log.h"
+#include <register.h>
+#include <log.h>
+
 void init_registers(registers_t* registers) {
   memset(registers, 0, sizeof(registers_t));
   registers->cpsr.raw = 0x6000001F;

@@ -8,48 +8,49 @@ endif()
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-find_package(glfw3 3.3 REQUIRED)
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+
 find_package(OpenGL REQUIRED)
-add_subdirectory(include/external/nativefiledialog-extended/)
+add_subdirectory(external/nativefiledialog-extended/)
 
 file(GLOB_RECURSE EMU_SRC "src/*.c")
 
-set(GLAD_SRC include/external/glad/src/glad.c)
 file(GLOB CIMGUI_SRC
-  "include/external/cimgui/*.cpp"
-  "include/external/cimgui/imgui/*.cpp"
-  "include/external/cimgui/imgui/backends/imgui_impl_glfw.cpp"
-  "include/external/cimgui/imgui/backends/imgui_impl_opengl3.cpp"
+  "${CMAKE_SOURCE_DIR}/external/cimgui/*.cpp"
+  "${CMAKE_SOURCE_DIR}/external/cimgui/imgui/*.cpp"
+  "${CMAKE_SOURCE_DIR}/external/cimgui/imgui/backends/imgui_impl_sdl.cpp"
+  "${CMAKE_SOURCE_DIR}/external/cimgui/imgui/backends/imgui_impl_opengl3.cpp"
 )
 
 add_library(cimgui ${CIMGUI_SRC})
 
 target_compile_definitions(cimgui PRIVATE 
-	IMGUI_IMPL_API=extern\ \"C\"
-	IMGUI_IMPL_OPENGL_LOADER_GLAD)
+	IMGUI_IMPL_API=extern\ \"C\")
+
+include(FindPkgConfig)
+pkg_check_modules(CAPSTONE REQUIRED capstone)
+pkg_check_modules(SDL2 REQUIRED sdl2)
 
 include_directories(
+  ${SDL2_INCLUDE_DIRS}
+  ${CAPSTONE_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/include/util/
   ${CMAKE_SOURCE_DIR}/include/core/
   ${CMAKE_SOURCE_DIR}/include/core/io/
   ${CMAKE_SOURCE_DIR}/include/core/cpu/
   ${CMAKE_SOURCE_DIR}/include/core/scheduler/
-  ${CMAKE_SOURCE_DIR}/include/external/
-  ${CMAKE_SOURCE_DIR}/include/external/glad/
-  ${CMAKE_SOURCE_DIR}/include/external/glad/include/
-  ${CMAKE_SOURCE_DIR}/include/external/glad/include/KHR/
-  ${CMAKE_SOURCE_DIR}/include/external/glad/include/glad/
-  ${CMAKE_SOURCE_DIR}/include/external/nativefiledialog-extended/
-  ${CMAKE_SOURCE_DIR}/include/external/cimgui/
-  ${CMAKE_SOURCE_DIR}/include/external/cimgui/imgui/
-  ${CMAKE_SOURCE_DIR}/include/external/cimgui/generator/output
+  ${CMAKE_SOURCE_DIR}/external/
+  ${CMAKE_SOURCE_DIR}/external/nativefiledialog-extended/
+  ${CMAKE_SOURCE_DIR}/external/cimgui/
+  ${CMAKE_SOURCE_DIR}/external/cimgui/imgui/
+  ${CMAKE_SOURCE_DIR}/external/cimgui/generator/output
 )
 
 if(WIN32)
-  set(FLAGS -static glfw3 OpenGL::GL gcc stdc++ winpthread winmm version Imm32 Setupapi)
+  set(FLAGS -static ${SDL2_LIBRARIES} OpenGL::GL gcc stdc++ winpthread winmm version Imm32 Setupapi)
 else()
-  set(FLAGS pthread glfw OpenGL::GL)
+  set(FLAGS dl pthread ${SDL2_LIBRARIES} OpenGL::GL)
 endif()
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -62,8 +63,6 @@ endif()
 
 add_executable(${CMAKE_PROJECT_NAME}
   ${EMU_SRC}
-  ${GLAD_SRC}
 )
 
-# So it links to GLFW but just forgets about it afterwards
-target_link_libraries(${CMAKE_PROJECT_NAME} ${FLAGS} ${CMAKE_DL_LIBS} nfd cimgui capstone)
+target_link_libraries(${CMAKE_PROJECT_NAME} ${FLAGS} nfd cimgui ${CAPSTONE_LIBRARIES})

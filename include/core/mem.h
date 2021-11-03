@@ -17,7 +17,7 @@ typedef struct mem_t {
 struct registers_t;
 
 void init_mem(mem_t* mem, scheduler_t* scheduler);
-void load_rom(mem_t* mem, const char* path);
+bool load_rom(mem_t* mem, const char* path);
 
 u8  read_8 (mem_t* mem, u32 pc, u32 addr);
 u16 read_16(mem_t* mem, u32 pc, u32 addr);
