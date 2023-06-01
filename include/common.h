@@ -22,6 +22,7 @@
 #define GBA_W 240
 #define GBA_H 160
 
+#define INLINE static inline __attribute__((always_inline))
 typedef  uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;

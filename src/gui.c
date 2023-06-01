@@ -4,7 +4,7 @@
 #include <math.h>
 #include <log.h>
 
-void* core_callback(void* vpargs) {
+INLINE void* core_callback(void* vpargs) {
   gui_t* gui = (gui_t*)vpargs;
   while(!atomic_load(&gui->emu_quit)) {
     run_frame(&gui->core);
@@ -69,7 +69,7 @@ void init_gui(gui_t* gui, const char* title) {
 
 	NFD_Init();
 
-  pthread_create(&gui->emu_thread_id, NULL, core_callback, (void*)gui);
+  //pthread_create(&gui->emu_thread_id, NULL, core_callback, (void*)gui);
 }
 
 ImVec2 image_size;
@@ -127,6 +127,8 @@ void main_loop(gui_t* gui) {
     
     main_menubar(gui);
     debugger_window(gui);
+
+    run_frame(&gui->core);
     
     igSetNextWindowSizeConstraints(ZERO, MAX, resize_callback, NULL);
     igBegin("Display", NULL, ImGuiWindowFlags_NoTitleBar);
@@ -265,7 +267,7 @@ void debugger_window(gui_t* gui) {
 
 void destroy_gui(gui_t* gui) {
   gui->emu_quit = true;
-  pthread_join(gui->emu_thread_id, NULL);
+  //pthread_join(gui->emu_thread_id, NULL);
   destroy_disasm(&gui->debugger);
   NFD_Quit();
   ImGui_ImplOpenGL3_Shutdown();
@@ -277,7 +279,6 @@ void destroy_gui(gui_t* gui) {
 }
 
 void open_file(gui_t* gui) {
-  gui->rom_file = "";
 	nfdfilteritem_t filter = { "GameBoy Advance roms", "gba" };
 	nfdresult_t result = NFD_OpenDialog(&gui->rom_file, &filter, 1, "roms/");
 	if(result == NFD_OKAY) {
@@ -290,7 +291,7 @@ void start(gui_t* gui) {
   gui->emu_quit = !gui->rom_loaded;
   gui->core.running = gui->rom_loaded;
   if(gui->rom_loaded) {
-    pthread_create(&gui->emu_thread_id, NULL, core_callback, (void*)gui);
+    //pthread_create(&gui->emu_thread_id, NULL, core_callback, (void*)gui);
   }
 }
 
@@ -301,7 +302,7 @@ void reset(gui_t* gui) {
 
 void stop(gui_t* gui) {
   gui->emu_quit = true;
-  pthread_join(gui->emu_thread_id, NULL);
+  //pthread_join(gui->emu_thread_id, NULL);
   init_core(&gui->core);
   gui->rom_loaded = false;
   gui->core.running = false;
