@@ -3,7 +3,6 @@
 #define LR 14
 
 #include <mem.h>
-#include <memory.h>
 
 typedef union {
   struct {

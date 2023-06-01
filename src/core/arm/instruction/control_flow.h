@@ -1,5 +1,5 @@
 #pragma once
-#include "register.h"
+#include <register.h>
 
 ARM_INSTRUCTION(b);
 ARM_INSTRUCTION(bx);

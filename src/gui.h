@@ -1,15 +1,15 @@
 #pragma once
 #define SDL_MAIN_HANDLED
-#include <SDL.h>
-#include <SDL_opengl.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 #define CIMGUI_DEFINE_ENUMS_AND_STRUCTS
 #include <cimgui.h>
 #include <cimgui_impl.h>
 #include <pthread.h>
-#include <core.h>
+#include "core.h"
 #include <stdatomic.h>
 #include <nfd.h>
-#include <disasm.h>
+#include "disasm.h"
 
 static const ImVec2 ZERO = {.x = 0, .y = 0};
 static const ImVec2 ONE = {.x = 1, .y = 1};

@@ -1,47 +1,46 @@
-cmake_minimum_required(VERSION 3.7.0)
+cmake_minimum_required(VERSION 3.20)
 project(boketto)
-
-if(CMAKE_VERSION VERSION_LESS "3.7.0")
-  set(CMAKE_INCLUDE_CURRENT_DIR ON)
-endif()
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-add_subdirectory(external/nativefiledialog-extended/)
-add_subdirectory(external/cimgui/)
-
-target_compile_definitions(cimgui PRIVATE
-	IMGUI_IMPL_API=extern\ \"C\")
+add_subdirectory(src/core)
+add_subdirectory(src/core/arm)
+add_subdirectory(src/core/arm/instruction)
+add_subdirectory(src/core/cpu)
+add_subdirectory(src/core/io)
+add_subdirectory(src/core/scheduler)
+add_subdirectory(src/core/thumb)
+add_subdirectory(src/core/thumb/instruction)
+add_subdirectory(external/nativefiledialog-extended)
+add_subdirectory(external/cimgui)
 
 find_package(OpenGL REQUIRED)
 find_package(capstone CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 
-include_directories(
-  ${CMAKE_SOURCE_DIR}/include
-  ${CMAKE_SOURCE_DIR}/include/util/
-  ${CMAKE_SOURCE_DIR}/include/core/
-  ${CMAKE_SOURCE_DIR}/include/core/io/
-  ${CMAKE_SOURCE_DIR}/include/core/cpu/
-  ${CMAKE_SOURCE_DIR}/include/core/scheduler/
-  ${CMAKE_SOURCE_DIR}/external/
-  ${CMAKE_SOURCE_DIR}/external/nativefiledialog-extended/
-  ${CMAKE_SOURCE_DIR}/external/cimgui/
-  ${CMAKE_SOURCE_DIR}/external/cimgui/imgui/
-  ${CMAKE_SOURCE_DIR}/external/cimgui/generator/output
+add_executable(boketto
+  src/main.c src/core.c src/disasm.c src/gui.c src/util/bit.c
 )
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-  add_compile_options(-g)
-  #add_compile_options(-fsanitize=address)
-  #add_link_options(-fsanitize=address)
+  target_compile_options(boketto PUBLIC -g)
+  #target_compile_options(boketto PUBLIC -fsanitize=address)
+  #target_link_options(boketto PUBLIC -fsanitize=address)
 elseif(CMAKE_BUILD_TYPE MATCHES Release)
-  add_compile_options(-O3)
+  target_compile_options(boketto PUBLIC -O3)
 endif()
 
-add_executable(${CMAKE_PROJECT_NAME}
-  ${EMU_SRC}
-)
-
-target_link_libraries(${CMAKE_PROJECT_NAME} nfd cimgui capstone)
+target_include_directories(boketto PUBLIC
+  src
+  src/util
+  src/core
+  src/core/cpu
+  src/core/io
+  src/core/scheduler
+  external
+  external/nativefiledialog-extended
+  external/cimgui
+  external/cimgui/imgui
+  external/cimgui/generator/output)
+target_link_libraries(boketto PUBLIC nfd cimgui capstone core arm arm-instructions cpu io scheduler thumb thumb-instructions)
