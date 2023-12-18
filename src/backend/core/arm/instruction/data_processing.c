@@ -23,8 +23,8 @@ u32 arm_data_processing_shift(registers_t* regs, bool* carry_out) {
   }
 }
 
-arm_handler arm_handle_data_processing(u32 instruction) {
-  switch(bits(instruction, 21, 24)) {
+arm_handler arm_handle_data_processing(u8 opcode) {
+  switch(opcode) {
     case 0b0000: return &arm_and;
     case 0b0001: return &arm_unimplemented_data_processing;
     case 0b0010: return &arm_unimplemented_data_processing;
@@ -41,7 +41,8 @@ arm_handler arm_handle_data_processing(u32 instruction) {
     case 0b1101: return &arm_mov;
     case 0b1110: return &arm_unimplemented_data_processing;
     case 0b1111: return &arm_unimplemented_data_processing;
-    default: return &arm_undefined_data_processing;
+    default:
+      return &arm_undefined_data_processing;
   }
 }
 

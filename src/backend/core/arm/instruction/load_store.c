@@ -3,14 +3,14 @@
 #include <helpers.h>
 
 arm_handler arm_handle_single_data_transfer(u32 instruction) {
-  if(bit(instruction, 26)) {
-    if (L(instruction)) {
+  if(bit(instruction, 10)) {
+    if (bit(instruction, 4)) {
       return &arm_ldr;
     } else {
       return &arm_str;
     }
   } else {
-    if (L(instruction)) {
+    if (bit(instruction, 4)) {
       return &arm_ldrh;
     } else {
       return &arm_strh;
@@ -19,7 +19,7 @@ arm_handler arm_handle_single_data_transfer(u32 instruction) {
 }
 
 arm_handler arm_handle_load_store_multiple(u32 instruction) {
-  if(bit(instruction, 20)) {
+  if(bit(instruction, 4)) {
     return &arm_ldm;
   } else {
     return &arm_stm;
@@ -43,8 +43,6 @@ ARM_INSTRUCTION(stm) {
   
   bool increment = bit(registers->instruction, 23);
   bool before = bit(registers->instruction, 24);
-
-  assert(list_mask != 0);
 
   u8 count_regs = 0;
   for(u8 i = 0; i < 15; i++) {
@@ -75,8 +73,6 @@ ARM_INSTRUCTION(ldm) {
   bool increment = bit(registers->instruction, 23);
   bool before = bit(registers->instruction, 24);
 
-  assert(list_mask != 0);
-
   u8 count_regs = 0;
   for(u8 i = 0; i < 15; i++) {
     if(bit(list_mask, i)) {
@@ -101,8 +97,6 @@ ARM_INSTRUCTION(strh) {
   bool I = B(instr); // STRH/LDRH's 'I' is STR/LDR's 'B'
   u32 address = registers->gpr[rn(instr)];
   u32 offset = I ? (bits(instr, 8, 11) << 4) | (instr & 0xf) : registers->gpr[rm(instr)];
-
-  
 
   if(P(instr)) {
     address = U(instr) ? address + offset : address - offset;

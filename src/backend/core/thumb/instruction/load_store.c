@@ -50,8 +50,6 @@ THUMB_INSTRUCTION(stmia) {
 
   u8 list_mask = registers->instruction & 0xff;
 
-  assert(list_mask != 0);
-
   for(u8 i = 0; i < 8; i++) {
     if(bit(list_mask, i)) {
       write_32(mem, registers->gpr[PC], base_address, registers->gpr[i]);
@@ -67,8 +65,6 @@ THUMB_INSTRUCTION(ldmia) {
   u32 base_address = registers->gpr[rb];
 
   u8 list_mask = registers->instruction & 0xff;
-
-  assert(list_mask != 0);
 
   for(u8 i = 0; i < 8; i++) {
     if(bit(list_mask, i)) {

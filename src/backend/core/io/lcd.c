@@ -16,6 +16,7 @@ u8 read8_io_ppu(ppu_io_t* io, u32 addr) {
     case 0xD: return io->bg2cnt.raw >> 8;
     case 0xE: return io->bg3cnt.raw & 0xff;
     case 0xF: return io->bg3cnt.raw >> 8;
+    default: break;
   }
 }
 
@@ -28,6 +29,7 @@ u16 read16_io_ppu(ppu_io_t* io, u32 addr) {
     case 0xA: return io->bg1cnt.raw;
     case 0xC: return io->bg2cnt.raw;
     case 0xE: return io->bg3cnt.raw;
+    default: break;
   }
 }
 
@@ -37,6 +39,7 @@ u32 read32_io_ppu(ppu_io_t* io, u32 addr) {
     case 0x4: return io->vcount     | (((u32)io->dispstat.raw) << 16);
     case 0x8: return io->bg1cnt.raw | (((u32)io->bg0cnt.raw) << 16);
     case 0xC: return io->bg3cnt.raw | (((u32)io->bg2cnt.raw) << 16);
+    default: break;
   }
 }
 
@@ -70,6 +73,7 @@ void write8_io_ppu(ppu_io_t* io, u32 addr, u8 val) {
     case 0x1D: io->bg3hofs      = (io->bg2cnt.raw & 0x00ff) | ((u16)val << 8); break;
     case 0x1E: io->bg3vofs.raw  = (io->bg3cnt.raw & 0xff00) | val; break;
     case 0x1F: io->bg3vofs.raw  = (io->bg3cnt.raw & 0x00ff) | ((u16)val << 8); break;
+    default: break;
   }
 }
 
@@ -89,6 +93,7 @@ void write16_io_ppu(ppu_io_t* io, u32 addr, u16 val) {
     case 0x1A: io->bg2vofs.raw = val; break;
     case 0x1C: io->bg3hofs = val; break;
     case 0x1E: io->bg3cnt.raw = val; break;
+    default: break;
   }
 }
 
@@ -126,5 +131,6 @@ void write32_io_ppu(ppu_io_t* io, u32 addr, u32 val) {
       io->bg3hofs = val & 0xffff;
       io->bg3vofs.raw = val >> 16;
       break;
+    default: break;
   }
 }

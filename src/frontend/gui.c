@@ -21,26 +21,20 @@ void init_gui(gui_t* gui, const char* title) {
 
   gui->rom_loaded = false;
   gui->running = true;
-
-  SDL_DisplayMode details;
-  SDL_GetCurrentDisplayMode(0, &details);
   
-  int w = details.w - (details.w / 4), h = details.h - (details.h / 4);
-  
-  gui->window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+  gui->window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
   gui->renderer = SDL_CreateRenderer(gui->window, -1, SDL_RENDERER_ACCELERATED);
   SDL_RenderSetLogicalSize(gui->renderer, GBA_W, GBA_H);
+
   gui->texture = SDL_CreateTexture(gui->renderer, SDL_PIXELFORMAT_BGR555, SDL_TEXTUREACCESS_STREAMING, GBA_W, GBA_H);
 
 	NFD_Init();
 
-  gui->emu_thread = SDL_CreateThread(core_callback, "Core_Callback", (void*)gui);
+  gui->emu_thread = SDL_CreateThread(core_callback, NULL, (void*)gui);
 }
 
 void main_loop(gui_t* gui) {
   while (gui->running) {
-    update_texture(gui);
-    
     SDL_Event event;
     while(SDL_PollEvent(&event)) {
       switch(event.type) {
@@ -64,6 +58,8 @@ void main_loop(gui_t* gui) {
       }
     }
 
+    update_texture(gui);
+    SDL_RenderClear(gui->renderer);
     SDL_RenderCopy(gui->renderer, gui->texture, NULL, NULL);
     SDL_RenderPresent(gui->renderer);
   }
@@ -73,13 +69,12 @@ void update_texture(gui_t* gui) {
   u8 current_framebuffer = atomic_load(&gui->core.mem.ppu.current_framebuffer) ^ 1;
   u16* framebuffer = gui->core.mem.ppu.framebuffers[current_framebuffer];
 
-  SDL_UpdateTexture(gui->texture, NULL, framebuffer, sizeof(u16)*GBA_W);
+  SDL_UpdateTexture(gui->texture, NULL, framebuffer, GBA_W * sizeof(u16));
 }
 
 void destroy_gui(gui_t* gui) {
   gui->emu_quit = true;
   SDL_DetachThread(gui->emu_thread);
-  
   NFD_Quit();
   SDL_DestroyTexture(gui->texture);
   SDL_DestroyRenderer(gui->renderer);
@@ -101,7 +96,7 @@ void start(gui_t* gui) {
   gui->emu_quit = !gui->rom_loaded;
   gui->core.running = gui->rom_loaded;
   if(gui->rom_loaded) {
-    gui->emu_thread = SDL_CreateThread(core_callback, "Core_Callback", (void*)gui);
+    gui->emu_thread = SDL_CreateThread(core_callback, NULL, (void*)gui);
   }
 }
 

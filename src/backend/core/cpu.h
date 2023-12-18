@@ -1,8 +1,8 @@
 #pragma once
-#include "arm/generator.h"
-#include "thumb/generator.h"
-#include "helpers.h"
-#include "mem.h"
+#include <arm/generator.h>
+#include <thumb/generator.h>
+#include <helpers.h>
+#include <mem.h>
 
 typedef struct {
   arm_handler arm_lut[4096];

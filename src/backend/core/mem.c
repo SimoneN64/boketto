@@ -24,13 +24,11 @@ bool load_rom(mem_t* mem, const char* path) {
   mem->rom_size = rounded_rom_size;
   fseek(fp, 0, SEEK_SET);
 
-  mem->rom = (u8*)malloc(rounded_rom_size);
+  mem->rom = (u8*)calloc(rounded_rom_size, 1);
   if(fread(mem->rom, 1, rom_size, fp) != rom_size) {
     printf("Failed to load rom\n");
     return false;
   }
-  
-  memset(&mem->rom[rom_size], 0, rounded_rom_size - rom_size);
 
   fclose(fp);
   return true;
@@ -65,7 +63,7 @@ u8 read_8(mem_t* mem, u32 pc, u32 addr) {
   case 0x07000000 ... 0x07FFFFFF: return mem->ppu.oam[addr & OAM_DSIZE];    
   case 0x08000000 ... 0x0DFFFFFF: return mem->rom[addr & (mem->rom_size - 1)];    
   default: break;
-//    logfatal("[ERR][MEM] Read8 from unhandled %s! (%08X) (PC: %08X)\n", region_str(addr), addr, pc);
+    logfatal("[ERR][MEM] Read8 from unhandled %s! (%08X) (PC: %08X)\n", region_str(addr), addr, pc);
   }
 }
 
@@ -85,7 +83,7 @@ u16 read_16(mem_t* mem, u32 pc, u32 addr) {
   case 0x07000000 ... 0x07FFFFFF: return *(u16*)&mem->ppu.oam[addr & OAM_DSIZE]; 
   case 0x08000000 ... 0x0DFFFFFF: return *(u16*)&mem->rom[addr & (mem->rom_size - 1)];
   default: break;
-//    logfatal("[ERR][MEM] Read16 from unhandled %s! (%08X) (PC: %08X)\n", region_str(addr), addr, pc);
+   logfatal("[ERR][MEM] Read16 from unhandled %s! (%08X) (PC: %08X)\n", region_str(addr), addr, pc);
   }
 }
 
@@ -104,8 +102,8 @@ u32 read_32(mem_t* mem, u32 pc, u32 addr) {
   case 0x06000000 ... 0x06FFFFFF: return *(u32*)&mem->ppu.vram[addr & VRAM_DSIZE];
   case 0x07000000 ... 0x07FFFFFF: return *(u32*)&mem->ppu.oam[addr & OAM_DSIZE];
   case 0x08000000 ... 0x0DFFFFFF: return *(u32*)&mem->rom[addr & (mem->rom_size - 1)];
-  default: break;
-//    logfatal("[ERR][MEM] Read32 from unhandled %s! (%08X) (PC: %08X)\n", region_str(addr), addr, pc);
+  default:
+    logfatal("[ERR][MEM] Read32 from unhandled %s! (%08X) (PC: %08X)\n", region_str(addr), addr, pc);
   }
 }
 
@@ -136,7 +134,7 @@ void write_8(mem_t* mem, u32 pc, u32 addr, u8 val) {
     mem->ppu.oam[addr & OAM_DSIZE] = val;
     break;
   default: break;
-//    logfatal("[ERR][MEM] Write8 (%02X) to unhandled %s (%08X) (PC: %08X)!\n", val, region_str(addr), addr, pc);
+    logfatal("[ERR][MEM] Write8 (%02X) to unhandled %s (%08X) (PC: %08X)!\n", val, region_str(addr), addr, pc);
   }
 }
 

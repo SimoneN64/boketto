@@ -63,7 +63,7 @@ void hblank_dispatch(ppu_t* ppu, const u64 time, scheduler_t* scheduler) {
 void mode3(ppu_t* ppu) {
   u16* framebuffer = ppu->framebuffers[ppu->current_framebuffer];
   u32 bufferIndex = ppu->io.vcount * GBA_W;
-  memcpy(&framebuffer[bufferIndex], &ppu->vram[bufferIndex << 1], GBA_W);
+  memcpy(&framebuffer[bufferIndex], &ppu->vram[bufferIndex << 1], GBA_W * 2);
   // for(int x = 0; x < GBA_W; x++) { 
   //   u16 raw_color = *(u16*)&ppu->vram[bufferIndex << 1];
   //   framebuffer[bufferIndex] = (color5_to_8(raw_color & 0x1F) << 24) | (color5_to_8((raw_color >> 5) & 0x1F) << 16)

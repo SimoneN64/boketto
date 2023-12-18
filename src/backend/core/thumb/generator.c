@@ -52,7 +52,7 @@ void generate_thumb_lut(thumb_handler thumb_lut[1024]) {
     } else if((mask & 0xFFC0) == 0x4180) {
       thumb_lut[i] = &thumb_sbc;
     } else {
-      thumb_lut[i] = &thumb_undefined;
+      thumb_lut[i] = &thumb_unimplemented;
     }
   }
 }

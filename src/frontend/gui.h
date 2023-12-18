@@ -1,5 +1,4 @@
 #pragma once
-#define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #include <core.h>
 #include <stdatomic.h>
@@ -9,9 +8,10 @@ typedef struct {
   SDL_Renderer* renderer;
   SDL_Texture* texture;
 	SDL_Window* window;
+  unsigned int id; // OpenGL framebuffer texture ID
 	nfdchar_t* rom_file;
   bool rom_loaded, running;
-  SDL_Thread* emu_thread;
+  SDL_Thread* emu_thread_id;
   atomic_bool emu_quit; 
   core_t core;
 } gui_t;

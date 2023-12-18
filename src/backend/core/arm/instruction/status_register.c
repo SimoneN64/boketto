@@ -1,14 +1,9 @@
 #include <arm/instruction/status_register.h>
 #include <log.h>
 
-arm_handler arm_handle_status_register(u32 instruction) {
-  return bit(instruction, 21) ? &arm_msr : &arm_mrs;
-}
-
 ARM_INSTRUCTION(msr) {
   bool privileged = registers->cpsr.mode != 0x10;
   u32 operand = 0;
-  char operand_str[8];
   operand = bit(registers->instruction, 25)
             ? ror32(registers->instruction & 0xff, bits(registers->instruction, 8, 11))
             : registers->gpr[registers->instruction & 0xf];
