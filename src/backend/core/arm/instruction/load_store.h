@@ -1,5 +1,5 @@
 #pragma once
-#include "register.h"
+#include <register.h>
 // Single data transfer bits that determine different behaviour, macro'd because "a little hardcoded values and random constants never hurt anyone" amirite
 #define I(x) (bit(x, 25))
 #define P(x) (bit(x, 24))

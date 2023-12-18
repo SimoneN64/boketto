@@ -1,7 +1,7 @@
 #pragma once
-#include "ppu.h"
-#include "io/dma.h"
-#include "scheduler/scheduler.h"
+#include <ppu.h>
+#include <io/dma.h>
+#include <scheduler/scheduler.h>
 
 typedef struct mem_t {
   u8 bios[BIOS_SIZE];

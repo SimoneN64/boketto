@@ -11,7 +11,7 @@ typedef struct {
   unsigned int id; // OpenGL framebuffer texture ID
 	nfdchar_t* rom_file;
   bool rom_loaded, running;
-  SDL_Thread* emu_thread_id;
+  SDL_Thread* emu_thread;
   atomic_bool emu_quit; 
   core_t core;
 } gui_t;

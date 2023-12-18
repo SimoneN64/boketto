@@ -6,7 +6,7 @@
 
 typedef struct {
   arm_handler arm_lut[4096];
-  thumb_handler thumb_lut[1024];
+  thumb_handler thumb_lut[256];
   registers_t regs;
 } cpu_t;
 

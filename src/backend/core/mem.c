@@ -1,6 +1,6 @@
-#include "mem.h"
+#include <mem.h>
 #include <stdio.h>
-#include "log.h"
+#include <log.h>
 
 void init_mem(mem_t* mem, scheduler_t* scheduler) {
   memset(mem->bios, 0, BIOS_SIZE);

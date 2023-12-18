@@ -11,7 +11,7 @@ void init_cpu(cpu_t* cpu) {
 void step_cpu(cpu_t* cpu, mem_t* mem) {
   if(cpu->regs.cpsr.thumb) {
     cpu->regs.instruction = fetch_16(&cpu->regs, mem);
-    size_t index = cpu->regs.instruction >> 6;
+    size_t index = cpu->regs.instruction >> 8;
     (cpu->thumb_lut[index])(&cpu->regs, mem);
   } else {
     cpu->regs.instruction = fetch_32(&cpu->regs, mem);

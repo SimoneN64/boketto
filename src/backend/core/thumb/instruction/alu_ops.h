@@ -1,5 +1,5 @@
 #pragma once
-#include "register.h"
+#include <register.h>
 
 THUMB_INSTRUCTION(lsl_imm);
 THUMB_INSTRUCTION(lsr_imm);

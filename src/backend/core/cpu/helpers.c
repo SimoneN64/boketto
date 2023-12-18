@@ -1,5 +1,5 @@
-#include "helpers.h"
-#include "log.h"
+#include <helpers.h>
+#include <log.h>
 
 bool get_condition(psr_t psr, u8 cond) {
   switch(cond & 0xf) {

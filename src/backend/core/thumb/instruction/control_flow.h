@@ -1,5 +1,5 @@
 #pragma once
-#include "register.h"
+#include <register.h>
 
 THUMB_INSTRUCTION(unimplemented_control_flow);
 THUMB_INSTRUCTION(bcond);

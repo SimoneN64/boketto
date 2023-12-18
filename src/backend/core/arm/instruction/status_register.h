@@ -1,5 +1,5 @@
 #pragma once
-#include "register.h"
+#include <register.h>
 
 arm_handler arm_handle_status_register(u32 instruction);
 

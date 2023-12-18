@@ -1,5 +1,5 @@
 #pragma once
-#include "register.h"
+#include <register.h>
 #include <log.h>
 
 #define SHIFT(name) static inline u32 name(u32 input, u8 amount, bool* carry_out, registers_t* registers)
