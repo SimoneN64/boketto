@@ -3,13 +3,13 @@
 #include <helpers.h>
 
 THUMB_INSTRUCTION(unimplemented_load_store) {
-  logfatal("Unimplemented thumb load/store instruction %04X (%s)\n", registers->instruction, binary_str(registers->instruction, 16));
+  logfatal("Unimplemented thumb load/store instruction %04X (%s)\n", instr, binary_str(instr, 16));
 }
 
 THUMB_INSTRUCTION(ldr_reg) {
-  u8 rd = registers->instruction & 7;
-  u8 rn = (registers->instruction >> 3) & 7;
-  u8 imm = bits(registers->instruction, 6, 10);
+  u8 rd = instr & 7;
+  u8 rn = (instr >> 3) & 7;
+  u8 imm = bits(instr, 6, 10);
   u32 addr = (imm * 4) + registers->gpr[rn];
   addr &= ~3;
   
@@ -17,9 +17,9 @@ THUMB_INSTRUCTION(ldr_reg) {
 }
 
 THUMB_INSTRUCTION(str_reg) {
-  u8 rd = registers->instruction & 7;
-  u8 rn = (registers->instruction >> 3) & 7;
-  u8 imm = bits(registers->instruction, 6, 10);
+  u8 rd = instr & 7;
+  u8 rn = (instr >> 3) & 7;
+  u8 imm = bits(instr, 6, 10);
   u32 addr = (imm * 4) + registers->gpr[rn];
   addr &= ~3;
   
@@ -27,9 +27,9 @@ THUMB_INSTRUCTION(str_reg) {
 }
 
 THUMB_INSTRUCTION(strh_imm) {
-  u8 rd = registers->instruction & 7;
-  u8 rn = (registers->instruction >> 3) & 7;
-  u8 imm = bits(registers->instruction, 6, 10);
+  u8 rd = instr & 7;
+  u8 rn = (instr >> 3) & 7;
+  u8 imm = bits(instr, 6, 10);
   
   u32 addr = registers->gpr[rn] + (imm * 2);
   addr &= ~1;
@@ -37,18 +37,18 @@ THUMB_INSTRUCTION(strh_imm) {
 }
 
 THUMB_INSTRUCTION(ldr_pc) {
-  u8 rd = bits(registers->instruction, 8, 10);
-  u16 imm = (registers->instruction & 0xff) << 2;
+  u8 rd = bits(instr, 8, 10);
+  u16 imm = (instr & 0xff) << 2;
   u32 addr = (registers->gpr[PC] & ~3) + imm;
   
   registers->gpr[rd] = read_32(mem, registers->gpr[PC], addr);
 }
 
 THUMB_INSTRUCTION(stmia) {
-  u8 rn = (registers->instruction >> 8) & 7;
+  u8 rn = (instr >> 8) & 7;
   u32 base_address = registers->gpr[rn];
 
-  u8 list_mask = registers->instruction & 0xff;
+  u8 list_mask = instr & 0xff;
 
   for(u8 i = 0; i < 8; i++) {
     if(bit(list_mask, i)) {
@@ -61,10 +61,10 @@ THUMB_INSTRUCTION(stmia) {
 }
 
 THUMB_INSTRUCTION(ldmia) {
-  u8 rb = (registers->instruction >> 8) & 7;
+  u8 rb = (instr >> 8) & 7;
   u32 base_address = registers->gpr[rb];
 
-  u8 list_mask = registers->instruction & 0xff;
+  u8 list_mask = instr & 0xff;
 
   for(u8 i = 0; i < 8; i++) {
     if(bit(list_mask, i)) {

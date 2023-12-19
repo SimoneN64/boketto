@@ -1,6 +1,8 @@
 #pragma once
 #include <register.h>
 
+THUMB_INSTRUCTION(unimplemented_alu);
+THUMB_INSTRUCTION(handle_alu);
 THUMB_INSTRUCTION(lsl_imm);
 THUMB_INSTRUCTION(lsr_imm);
 THUMB_INSTRUCTION(add_reg);

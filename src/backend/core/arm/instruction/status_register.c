@@ -4,14 +4,14 @@
 ARM_INSTRUCTION(msr) {
   bool privileged = registers->cpsr.mode != 0x10;
   u32 operand = 0;
-  operand = bit(registers->instruction, 25)
-            ? ror32(registers->instruction & 0xff, bits(registers->instruction, 8, 11))
-            : registers->gpr[registers->instruction & 0xf];
+  operand = bit(instr, 25)
+            ? ror32(instr & 0xff, bits(instr, 8, 11))
+            : registers->gpr[instr & 0xf];
 
-  u32 mask = (bit(registers->instruction, 16) && privileged) * 0x000000ff
-           | (bit(registers->instruction, 19) * 0xf0000000);
+  u32 mask = (bit(instr, 16) && privileged) * 0x000000ff
+           | (bit(instr, 19) * 0xf0000000);
 
-  if(bit(registers->instruction, 22)) {
+  if(bit(instr, 22)) {
     registers->spsr.raw = (registers->spsr.raw & ~mask) | (operand & mask);
   } else {
     u32 val = (registers->cpsr.raw & ~mask) | (operand & mask);
@@ -21,8 +21,8 @@ ARM_INSTRUCTION(msr) {
 }
 
 ARM_INSTRUCTION(mrs) {
-  u8 rd = (registers->instruction >> 12) & 0xf;
-  if(bit(registers->instruction, 22)) {
+  u8 rd = (instr >> 12) & 0xf;
+  if(bit(instr, 22)) {
     registers->gpr[rd] = registers->spsr.raw;
   } else {
     registers->gpr[rd] = registers->cpsr.raw;

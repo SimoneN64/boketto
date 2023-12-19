@@ -30,10 +30,10 @@ static inline void print_push_pop(u32 instruction) {
 
 THUMB_INSTRUCTION(push) {
   u8 num_reg = 0;
-  print_push_pop(registers->instruction);
+  print_push_pop(instr);
 
   for(int i = 0; i < 8; i++) {
-    if(bit(registers->instruction, i)) {
+    if(bit(instr, i)) {
       num_reg++;
     }
   }
@@ -42,7 +42,7 @@ THUMB_INSTRUCTION(push) {
   u32 end_addr = registers->gpr[13] - 4;
   registers->gpr[13] -= 4 * num_reg;
   for(int i = 0; i < 9 && start_addr < end_addr; start_addr += 4, i++) {
-    if(bit(registers->instruction, i)) {
+    if(bit(instr, i)) {
       if(i == 8) {
         write_32(mem, registers->gpr[PC], start_addr, registers->gpr[13]);
         continue;
@@ -54,10 +54,10 @@ THUMB_INSTRUCTION(push) {
 
 THUMB_INSTRUCTION(pop) {
   u8 num_reg = 0;
-  print_push_pop(registers->instruction);
+  print_push_pop(instr);
 
   for(int i = 0; i < 8; i++) {
-    if(bit(registers->instruction, i)) {
+    if(bit(instr, i)) {
       num_reg++;
     }
   }
@@ -66,7 +66,7 @@ THUMB_INSTRUCTION(pop) {
   u32 end_addr = (registers->gpr[13] + (4 * num_reg)) - 4;
   registers->gpr[13] += 4 * num_reg;
   for(int i = 0; i < 9 && start_addr < end_addr; start_addr += 4, i++) {
-    if(bit(registers->instruction, i)) {
+    if(bit(instr, i)) {
       if(i == 8) {
         set_pc(false, mem, registers, read_32(mem, registers->gpr[PC], start_addr) & 0xfffffffe, registers->cpsr.thumb);
         continue;
@@ -77,9 +77,9 @@ THUMB_INSTRUCTION(pop) {
 }
 
 THUMB_INSTRUCTION(asr_imm) {
-  u8 rd = registers->instruction & 7;
-  u8 rm = bits(registers->instruction,3, 5);
-  u8 imm = bits(registers->instruction, 6, 10);
+  u8 rd = instr & 7;
+  u8 rm = bits(instr,3, 5);
+  u8 imm = bits(instr, 6, 10);
   
   if(imm == 0) {
     registers->cpsr.carry = registers->gpr[rm] >> 31;

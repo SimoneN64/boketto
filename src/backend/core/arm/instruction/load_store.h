@@ -13,7 +13,7 @@
 
 arm_handler arm_handle_single_data_transfer(u32 instruction);
 arm_handler arm_handle_load_store_multiple(u32 instruction);
-u32 arm_sdt_shift(registers_t* regs);
+u32 arm_sdt_shift(u32, registers_t* regs);
 
 ARM_INSTRUCTION(str);
 ARM_INSTRUCTION(ldr);

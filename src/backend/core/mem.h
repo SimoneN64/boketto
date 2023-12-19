@@ -14,8 +14,6 @@ typedef struct mem_t {
   bool ime;
 } mem_t;
 
-struct registers_t;
-
 void init_mem(mem_t* mem, scheduler_t* scheduler);
 bool load_rom(mem_t* mem, const char* path);
 

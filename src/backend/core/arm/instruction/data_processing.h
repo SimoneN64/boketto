@@ -2,7 +2,7 @@
 #include <register.h>
 
 arm_handler arm_handle_data_processing(u8);
-u32 arm_data_processing_shift(registers_t* regs, bool* carry_out);
+u32 arm_data_processing_shift(u32, registers_t* regs, bool* carry_out);
 
 ARM_INSTRUCTION(mov);
 ARM_INSTRUCTION(add);

@@ -21,7 +21,13 @@ void generate_thumb_lut(thumb_handler thumb_lut[256]) {
         default: thumb_lut[i] = &thumb_undefined;
       }
     } else if((i >> 2) == 0x10) {
-
+      thumb_lut[i] = &thumb_handle_alu;
+    } else if ((i >> 2) == 0x11) {
+      if ((i & 3) == 3) {
+        thumb_lut[i] = &thumb_bx;
+      } else {
+        thumb_lut[i] = &thumb_unimplemented;
+      }
     } else {
       thumb_lut[i] = &thumb_undefined;
     }

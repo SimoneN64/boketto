@@ -26,23 +26,23 @@ arm_handler arm_handle_load_store_multiple(u32 instruction) {
   }
 }
 
-u32 arm_sdt_shift(registers_t* regs) {
-  u8 type = bits(regs->instruction, 5, 6);
-  u8 amount = bits(regs->instruction, 7, 11);
-  u32 input = regs->gpr[regs->instruction & 0xf];
+u32 arm_sdt_shift(u32 instr, registers_t* regs) {
+  u8 type = bits(instr, 5, 6);
+  u8 amount = bits(instr, 7, 11);
+  u32 input = regs->gpr[instr & 0xf];
   bool carry_out = regs->cpsr.carry;
   u32 result = shift_imm(type, input, amount, &carry_out, regs);
   return result;
 }
 
 ARM_INSTRUCTION(stm) {
-  u8 rn = bits(registers->instruction, 16, 19);
+  u8 rn = bits(instr, 16, 19);
   u32 base_address = registers->gpr[rn];
 
-  u16 list_mask = registers->instruction & 0xffff;
+  u16 list_mask = instr & 0xffff;
   
-  bool increment = bit(registers->instruction, 23);
-  bool before = bit(registers->instruction, 24);
+  bool increment = bit(instr, 23);
+  bool before = bit(instr, 24);
 
   u8 count_regs = 0;
   for(u8 i = 0; i < 15; i++) {
@@ -59,19 +59,19 @@ ARM_INSTRUCTION(stm) {
     }
   }
 
-  if(W(registers->instruction)) {
-    registers->gpr[rn] += U(registers->instruction) ? (count_regs * 4) : -(count_regs * 4);
+  if(W(instr)) {
+    registers->gpr[rn] += U(instr) ? (count_regs * 4) : -(count_regs * 4);
   }
 }
 
 ARM_INSTRUCTION(ldm) {
-  u8 rn = bits(registers->instruction, 16, 19);
+  u8 rn = bits(instr, 16, 19);
   u32 base_address = registers->gpr[rn];
 
-  u16 list_mask = registers->instruction & 0xffff;
+  u16 list_mask = instr & 0xffff;
   
-  bool increment = bit(registers->instruction, 23);
-  bool before = bit(registers->instruction, 24);
+  bool increment = bit(instr, 23);
+  bool before = bit(instr, 24);
 
   u8 count_regs = 0;
   for(u8 i = 0; i < 15; i++) {
@@ -87,13 +87,12 @@ ARM_INSTRUCTION(ldm) {
     }
   }
 
-  if(W(registers->instruction)) {
-    registers->gpr[rn] += U(registers->instruction) ? (count_regs * 4) : -(count_regs * 4);
+  if(W(instr)) {
+    registers->gpr[rn] += U(instr) ? (count_regs * 4) : -(count_regs * 4);
   }
 }
 
 ARM_INSTRUCTION(strh) {
-  u32 instr = registers->instruction;
   bool I = B(instr); // STRH/LDRH's 'I' is STR/LDR's 'B'
   u32 address = registers->gpr[rn(instr)];
   u32 offset = I ? (bits(instr, 8, 11) << 4) | (instr & 0xf) : registers->gpr[rm(instr)];
@@ -120,7 +119,6 @@ ARM_INSTRUCTION(strh) {
 }
 
 ARM_INSTRUCTION(ldrh) {
-  u32 instr = registers->instruction;
   bool I = B(instr); // STRH/LDRH's 'I' is STR/LDR's 'B'
   u32 address = registers->gpr[rn(instr)];
   u32 offset = I ? (bits(instr, 8, 11) << 4) | (instr & 0xf) : registers->gpr[rm(instr)];
@@ -153,9 +151,8 @@ ARM_INSTRUCTION(ldrh) {
 }
 
 ARM_INSTRUCTION(str) {
-  u32 instr = registers->instruction;
   u32 address = registers->gpr[rn(instr)];
-  u32 offset = I(instr) ? arm_sdt_shift(registers) : instr & 0xfff;
+  u32 offset = I(instr) ? arm_sdt_shift(instr, registers) : instr & 0xfff;
 
   if(P(instr)) {
     address = U(instr) ? address + offset : address - offset;
@@ -185,9 +182,8 @@ ARM_INSTRUCTION(str) {
 }
 
 ARM_INSTRUCTION(ldr) {
-  u32 instr = registers->instruction;
   u32 address = registers->gpr[rn(instr)];
-  u32 offset = I(instr) ? arm_sdt_shift(registers) : instr & 0xfff;
+  u32 offset = I(instr) ? arm_sdt_shift(instr, registers) : instr & 0xfff;
 
   if(P(instr)) {
     address = U(instr) ? address + offset : address - offset;
@@ -224,9 +220,9 @@ ARM_INSTRUCTION(ldr) {
 }
 
 ARM_INSTRUCTION(undefined_single_data_transfer) {
-  logfatal("Undefined single data transfer instruction: (%08X) (%s)\n", registers->instruction, binary_str(registers->instruction, 32));
+  logfatal("Undefined single data transfer instruction: (%08X) (%s)\n", instr, binary_str(instr, 32));
 }
 
 ARM_INSTRUCTION(unimplemented_single_data_transfer) {
-  logfatal("Unimplemented single data transfer instruction: (%08X) (%s)\n", registers->instruction, binary_str(registers->instruction, 32));
+  logfatal("Unimplemented single data transfer instruction: (%08X) (%s)\n", instr, binary_str(instr, 32));
 }
